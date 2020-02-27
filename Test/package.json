@@ -1,0 +1,15 @@
+{
+  "name": "moleculer",
+  "version": "0.2.0",
+  "main": "index.js",
+  "author": "MoleculerJS",
+  "license": "MIT",
+  "devDependencies": {
+    "moleculer": "^0.14.0",
+    "moleculer-repl": "^0.6.2",
+    "moleculer-web": "^0.9.0"
+  },
+  "dependencies": {
+    "moleculer-app": "file:../MoleculerApolloGraph"
+  }
+}

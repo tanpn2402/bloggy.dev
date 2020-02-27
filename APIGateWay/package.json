@@ -1,7 +1,7 @@
 {
-  "name": "moleculer-test",
+  "name": "apigateway",
   "version": "1.0.0",
-  "description": "My Moleculer project",
+  "description": "API Gateway",
   "scripts": {
     "dev": "moleculer-runner --repl --hot services",
     "start": "moleculer-runner services",
@@ -13,22 +13,29 @@
     "microservices",
     "moleculer"
   ],
-  "author": "",
+  "author": "tanpn2402",
   "devDependencies": {
     "eslint": "^4.15.0",
     "jest": "^22.0.4",
     "jest-cli": "^22.0.4",
-    "moleculer-repl": "^0.3.0"
+    "moleculer-repl": "^0.6.2"
   },
   "dependencies": {
     "@grpc/proto-loader": "^0.1.0",
     "google-protobuf": "^3.0.0",
+    "graphql": "^14.6.0",
     "grpc": "^1.11.0",
     "lodash": "^4.6.1",
     "minimist": "^1.2.0",
-    "moleculer": "^0.11.0",
+    "moleculer": "^0.14.0",
+    "apollo-server-core": "^2.10.0",
+    "dataloader": "^2.0.0",
+    "graphql-subscriptions": "^1.1.0",
+    "graphql-tools": "^4.0.6",
+    "graphql-upload": "^10.0.0",
     "moleculer-db": "^0.8.5",
-    "moleculer-web": "^0.6.0"
+    "moleculer-web": "^0.9.0",
+    "moleculer-apollo-graph": "file:../MoleculerApolloGraph"
   },
   "engines": {
     "node": ">= 6.x.x"

@@ -1,6 +1,7 @@
 {
-  "name": "grpc-examples",
+  "name": "userservice",
   "version": "0.1.0",
+  "description": "User Service is using gRPC",
   "dependencies": {
     "@grpc/proto-loader": "^0.1.0",
     "async": "^1.5.2",
@@ -13,7 +14,11 @@
     "minimist": "^1.2.0"
   },
   "scripts": {
-    "start-server": "node ./src/server.js",
-    "start-client": "node ./src/client.js"
-  }
+    "start": "node ./src/index.js"
+  },
+  "keywords": [
+    "microservices",
+    "moleculer"
+  ],
+  "author": "tanpn2402",
 }

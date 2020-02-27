@@ -13,15 +13,15 @@ module.exports = {
         "sourceType": "module"
     },
     "rules": {
-        "indent": [
-            "warn",
-            "tab",
-            { "SwitchCase": 1 }
-        ],
-        "quotes": [
-            "warn",
-            "double"
-        ],
+        // "indent": [
+        //     "warn",
+        //     "space",
+        //     { "SwitchCase": 1 }
+        // ],
+        // "quotes": [
+        //     "warn",
+        //     "single"
+        // ],
         "semi": [
             "error",
             "always"
