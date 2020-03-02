@@ -1,4 +1,5 @@
 // index.js
+const _ = require("lodash");
 const ApiGateway = require("moleculer-web");
 const ERRORS = require("moleculer-web").Errors;
 const { ApolloService } = require("moleculer-apollo-server");
@@ -24,7 +25,7 @@ module.exports = {
     settings: {
         routes: [
             {
-                path: '/static',
+                path: '/assets',
                 authentication: false,
                 authorization: false,
                 aliases: {
@@ -55,12 +56,28 @@ module.exports = {
                     json: true,
                     urlencoded: true
                 },
+                // Set CORS headers
+                cors: true,
+                // Disable to call not-mapped actions
+                mappingPolicy: "restrict",
+
                 aliases: {
                     "GET /products": "products.listProducts",
                     "POST /products": "products.listProducts",
 
+                    // Login
+                    "POST /users/login": "users.login",
+
                     // Users
                     "REST /users": "users",
+
+                    // Current user
+                    "GET /user": "users.me",
+
+                    // Articles
+                    "GET /articles/feed": "articles.feed",
+                    "REST /articles": "articles",
+                    "GET /tags": "articles.tags",
                 },
                 onBeforeCall(ctx, route, req, res) {
                     this.logger.info("onBeforeCall in protected route");
@@ -75,7 +92,31 @@ module.exports = {
                     return data;
                 },
             }
-        ]
+        ],
+
+        onError(req, res, err) {
+            // Return with the error as JSON object
+            res.setHeader("Content-type", "application/json; charset=utf-8");
+            res.writeHead(err.code || 500);
+
+            if (err.code === 422) {
+                let o = {};
+                err.data.forEach(e => {
+                    let field = e.field.split(".").pop();
+                    o[field] = e.message;
+                });
+
+                res.end(JSON.stringify({
+                    errorCode: err.code,
+                    errors: o
+                }, null, 2));
+            } else {
+                const errObj = _.pick(err, ["name", "message", "code", "type", "data"]);
+                res.end(JSON.stringify(errObj, null, 2));
+            }
+            this.logResponse(req, res, err ? err.ctx : null);
+        }
+
     },
 
     methods: {
@@ -119,6 +160,9 @@ module.exports = {
 
             if (auth && auth.startsWith("Bearer")) {
                 token = auth.slice(7);
+            }
+            else if (auth && auth.startsWith("Token")) {
+                token = auth.slice(6);
             }
 
             return this.Promise.resolve(token)

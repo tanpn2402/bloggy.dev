@@ -14,7 +14,7 @@ module.exports = {
 
     actions: {
         get(ctx) {
-            let d = base64_encode('/home/tanpham/Desktop/ms/bloggy.dev/MediaService/assets/images/index.jpeg');
+            let d = base64_encode('./assets/images/index.jpeg');
 
             // ctx.meta.$responseType = "image/jpeg";
             // ctx.meta.$contentLength = d.length;
@@ -26,7 +26,7 @@ module.exports = {
             return  d;
         },
         stream(ctx) {
-            return fs.createReadStream('/home/tanpham/Desktop/ms/bloggy.dev/MediaService/assets/images/index.jpeg');
+            return fs.createReadStream('./assets/images/index.jpeg');
         },
     }
 }

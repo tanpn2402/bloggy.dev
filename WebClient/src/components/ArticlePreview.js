@@ -37,7 +37,7 @@ const ArticlePreview = props => {
     <div className="article-preview">
       <div className="article-meta">
         <Link to={`/@${article.author.username}`}>
-          <img src={article.author.image} alt={article.author.username} />
+          <img src={'http://localhost:3000' + article.author.image} alt={article.author.username} />
         </Link>
 
         <div className="info">
