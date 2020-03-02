@@ -1,8 +1,10 @@
 "use strict";
 
+const os = require("os");
+
 // moleculer.config.js
 module.exports = {
-    nodeID: "node-test-1",
+    nodeID: os.hostname().toLowerCase() + "-" + process.pid,
     logger: true,
     logLevel: "debug",
 

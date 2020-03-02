@@ -49,7 +49,7 @@ module.exports = {
             },
             {
                 path: '/api',
-                authentication: true,
+                // authentication: true,
                 authorization: true,
                 bodyParsers: {
                     json: true,
@@ -57,7 +57,10 @@ module.exports = {
                 },
                 aliases: {
                     "GET /products": "products.listProducts",
-                    "POST /products": "products.listProducts"
+                    "POST /products": "products.listProducts",
+
+                    // Users
+                    "REST /users": "users",
                 },
                 onBeforeCall(ctx, route, req, res) {
                     this.logger.info("onBeforeCall in protected route");
@@ -111,27 +114,34 @@ module.exports = {
 		 * @returns {Promise}
 		 */
         authorize(ctx, route, req) {
-            console.log(ctx);
+            let token;
             let auth = req.headers["authorization"];
+
             if (auth && auth.startsWith("Bearer")) {
-                let token = auth.slice(7);
-
-                console.log('authorize token = ', token)
-                // Check the token
-                if (token == "123456") {
-                    // Set the authorized user entity to `ctx.meta`
-                    // ctx.meta.user = { id: 1, name: "John Doe" };
-                    return Promise.resolve(ctx);
-
-                } else {
-                    // Invalid token
-                    return Promise.reject(new ERRORS.UnAuthorizedError(ERRORS.ERR_INVALID_TOKEN));
-                }
-
-            } else {
-                // No token
-                return Promise.reject(new ERRORS.UnAuthorizedError(ERRORS.ERR_NO_TOKEN));
+                token = auth.slice(7);
             }
+
+            return this.Promise.resolve(token)
+                .then(token => {
+                    // Verify JWT token
+                    return ctx.call("users.resolveToken", { token })
+                        .then(user => {
+                            if (user) {
+                                this.logger.info("Authenticated via JWT: ", user);
+                                ctx.meta.user = user;
+                                ctx.meta.token = token;
+                            }
+                            return user;
+                        })
+                        .catch(err => {
+                            return null;
+                        });
+                })
+                .then(user => {
+                    if (req.$endpoint.action.auth == "required" && !user) {
+                        return this.Promise.reject(new ERRORS.UnAuthorizedError(ERRORS.ERR_NO_TOKEN));
+                    }
+                })
         },
     },
 
