@@ -24,6 +24,30 @@ module.exports = {
     settings: {
         routes: [
             {
+                path: '/static',
+                authentication: false,
+                authorization: false,
+                aliases: {
+                    /**
+                     * get image
+                     * @param {*} req 
+                     * @param {*} res 
+                     */
+                    "GET /images/:file"(req, res) {
+
+                        const filename = "avatar-123.jpeg";
+
+                        req.$ctx.call("image.stream", { filename })
+                            .then(stream => {
+                                res.writeHead(200, {
+                                    'Content-Type': 'image/jpeg'
+                                });
+                                stream.pipe(res);
+                            })
+                    }
+                }
+            },
+            {
                 path: '/api',
                 authentication: true,
                 authorization: true,
