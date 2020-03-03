@@ -8,6 +8,7 @@ import {
 export default (state = {}, action) => {
   switch (action.type) {
     case ARTICLE_PAGE_LOADED:
+      console.log(action)
       return {
         ...state,
         article: action.payload[0].article,

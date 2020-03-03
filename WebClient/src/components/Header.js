@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { API_URL } from '../constants/constants';
 
 const LoggedOutView = props => {
   if (!props.currentUser) {
@@ -57,7 +58,7 @@ const LoggedInView = props => {
           <Link
             to={`/@${props.currentUser.username}`}
             className="nav-link">
-            <img src={'http://localhost:3000' + props.currentUser.image} className="user-pic" alt={props.currentUser.username} />
+            <img src={API_URL + props.currentUser.image} className="user-pic" alt={props.currentUser.username} />
             {props.currentUser.username}
           </Link>
         </li>

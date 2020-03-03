@@ -2,6 +2,7 @@ import React from 'react';
 import agent from '../../agent';
 import { connect } from 'react-redux';
 import { ADD_COMMENT } from '../../constants/actionTypes';
+import { API_URL } from '../../constants/constants';
 
 const mapDispatchToProps = dispatch => ({
   onSubmit: payload =>
@@ -41,7 +42,7 @@ class CommentInput extends React.Component {
         </div>
         <div className="card-footer">
           <img
-            src={this.props.currentUser.image}
+            src={API_URL + this.props.currentUser.image}
             className="comment-author-img"
             alt={this.props.currentUser.username} />
           <button

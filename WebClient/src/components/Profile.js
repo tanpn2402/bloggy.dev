@@ -9,6 +9,7 @@ import {
   PROFILE_PAGE_LOADED,
   PROFILE_PAGE_UNLOADED
 } from '../constants/actionTypes';
+import { API_URL } from '../constants/constants';
 
 const EditProfileSettings = props => {
   if (props.isUser) {
@@ -87,6 +88,8 @@ class Profile extends React.Component {
   }
 
   renderTabs() {
+    console.log(this.props);
+
     return (
       <ul className="nav nav-pills outline-active">
         <li className="nav-item">
@@ -125,7 +128,7 @@ class Profile extends React.Component {
             <div className="row">
               <div className="col-xs-12 col-md-10 offset-md-1">
 
-                <img src={profile.image} className="user-img" alt={profile.username} />
+                <img src={API_URL + profile.image} className="user-img" alt={profile.username} />
                 <h4>{profile.username}</h4>
                 <p>{profile.bio}</p>
 

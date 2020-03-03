@@ -1,9 +1,10 @@
 import superagentPromise from 'superagent-promise';
 import _superagent from 'superagent';
+import { API_URL } from './constants/constants';
 
 const superagent = superagentPromise(_superagent, global.Promise);
 
-const API_ROOT = 'http://localhost:3000/api';
+const API_ROOT = API_URL + '/api';
 
 const encode = encodeURIComponent;
 const responseBody = res => res.body;

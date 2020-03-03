@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import agent from '../agent';
 import { connect } from 'react-redux';
 import { ARTICLE_FAVORITED, ARTICLE_UNFAVORITED } from '../constants/actionTypes';
+import { API_URL } from '../constants/constants';
 
 const FAVORITED_CLASS = 'btn btn-sm btn-primary';
 const NOT_FAVORITED_CLASS = 'btn btn-sm btn-outline-primary';
@@ -37,7 +38,7 @@ const ArticlePreview = props => {
     <div className="article-preview">
       <div className="article-meta">
         <Link to={`/@${article.author.username}`}>
-          <img src={'http://localhost:3000' + article.author.image} alt={article.author.username} />
+          <img src={API_URL + article.author.image} alt={article.author.username} />
         </Link>
 
         <div className="info">

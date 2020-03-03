@@ -70,6 +70,8 @@ export default (state = {}, action) => {
       };
     case PROFILE_PAGE_LOADED:
     case PROFILE_FAVORITES_PAGE_LOADED:
+
+      console.log('article')
       return {
         ...state,
         pager: action.pager,

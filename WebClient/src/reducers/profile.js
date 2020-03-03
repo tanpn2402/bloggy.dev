@@ -8,6 +8,7 @@ import {
 export default (state = {}, action) => {
   switch (action.type) {
     case PROFILE_PAGE_LOADED:
+      console.log('profiles', action)
       return {
         ...action.payload[0].profile
       };
