@@ -34,16 +34,22 @@ module.exports = {
                      * @param {*} req 
                      * @param {*} res 
                      */
-                    "GET /images/:file"(req, res) {
+                    "GET /:folder1/:folder2/:filename"(req, res) {
+                        const { folder1, folder2, filename } = req.$params;
+                        const path = folder1 + "/" + folder2 + "/" + filename;
 
-                        const filename = "avatar-123.jpeg";
-
-                        req.$ctx.call("image.stream", { filename })
+                        req.$ctx.call("image.stream", { path })
                             .then(stream => {
                                 res.writeHead(200, {
                                     'Content-Type': 'image/jpeg'
                                 });
                                 stream.pipe(res);
+                            })
+                            .catch(err => {
+                                res.writeHead(500, {
+                                    'Content-Type': 'text'
+                                });
+                                res.end(err.message)
                             })
                     }
                 }
@@ -59,7 +65,7 @@ module.exports = {
                 // Set CORS headers
                 cors: true,
                 // Disable to call not-mapped actions
-                mappingPolicy: "restrict",
+                // mappingPolicy: "restrict",
 
                 aliases: {
                     "GET /products": "products.listProducts",
@@ -73,11 +79,28 @@ module.exports = {
 
                     // Current user
                     "GET /user": "users.me",
+                    "PUT /user": "users.updateMyself",
 
                     // Articles
                     "GET /articles/feed": "articles.feed",
                     "REST /articles": "articles",
                     "GET /tags": "articles.tags",
+
+                    // Comments
+                    "GET /articles/:slug/comments": "articles.comments",
+                    "POST /articles/:slug/comments": "articles.addComment",
+                    "PUT /articles/:slug/comments/:commentID": "articles.updateComment",
+                    "DELETE /articles/:slug/comments/:commentID": "articles.removeComment",
+
+                    // Favorites
+                    "POST /articles/:slug/favorite": "articles.favorite",
+                    "DELETE /articles/:slug/favorite": "articles.unfavorite",
+
+
+                    // Profile
+                    "GET /profiles/:username": "users.profile",
+                    "POST /profiles/:username/follow": "users.follow",
+                    "DELETE /profiles/:username/follow": "users.unfollow",
                 },
                 onBeforeCall(ctx, route, req, res) {
                     this.logger.info("onBeforeCall in protected route");
@@ -97,7 +120,7 @@ module.exports = {
         onError(req, res, err) {
             // Return with the error as JSON object
             res.setHeader("Content-type", "application/json; charset=utf-8");
-            res.writeHead(err.code || 500);
+            res.writeHead(200);
 
             if (err.code === 422) {
                 let o = {};

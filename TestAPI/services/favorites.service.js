@@ -21,6 +21,61 @@ module.exports = {
     actions: {
 
 		/**
+		 * Create a new favorite record
+		 * 
+		 * @actions
+		 * 
+		 * @param {String} article - Article ID
+		 * @param {String} user - User ID
+		 * @returns {Object} Created favorite record
+		 */		
+		add: {
+			params: {
+				article: { type: "string" },
+				user: { type: "string" },
+			},
+			handler(ctx) {
+				const { article, user } = ctx.params;
+				return this.findByArticleAndUser(article, user)
+					.then(item => {
+						if (item)
+							return this.Promise.reject(new MoleculerClientError("Articles has already favorited"));
+
+						return this.adapter.insert({ article, user, createdAt: new Date() })
+							.then(json => this.entityChanged("created", json, ctx).then(() => json));
+
+					});
+			}
+		},
+
+		/**
+		 * Delete a favorite record
+		 * 
+		 * @actions
+		 * 
+		 * @param {String} article - Article ID
+		 * @param {String} user - User ID
+		 * @returns {Number} Count of removed records
+		 */		
+		delete: {
+			params: {
+				article: { type: "string" },
+				user: { type: "string" },
+			},
+			handler(ctx) {
+				const { article, user } = ctx.params;
+				return this.findByArticleAndUser(article, user)
+					.then(item => {
+						if (!item)
+							return this.Promise.reject(new MoleculerClientError("Articles has not favorited yet"));
+
+						return this.adapter.removeById(item._id)
+							.then(json => this.entityChanged("removed", json, ctx).then(() => json));
+					});
+			}
+		},
+
+		/**
 		 * Check the given 'article' is followed by 'user'.
 		 * 
 		 * @actions
@@ -72,6 +127,23 @@ module.exports = {
                 return this.adapter.count({ query });
             }
         },
+
+		/**
+		 * Remove all favorites by article
+		 * 
+		 * @actions
+		 * 
+		 * @param {String} article - Article ID
+		 * @returns {Number} Count of removed records
+		 */
+        removeByArticle: {
+            params: {
+                article: { type: "string" }
+            },
+            handler(ctx) {
+                return this.adapter.removeMany(ctx.params);
+            }
+        }
     },
 
 	/**

@@ -23,10 +23,20 @@ module.exports = {
             // };
 
             // return "I'm image service";
-            return  d;
+            return d;
         },
         stream(ctx) {
-            return fs.createReadStream('./assets/images/index.jpeg');
+            const path = './assets/' + ctx.params.path;
+
+            try {
+                if (fs.existsSync(path)) {
+                    return fs.createReadStream(path);
+                }
+                throw "FILE NOT FOUND";
+            }
+            catch (err) {
+                return this.Promise.reject(err);
+            }
         },
     }
 }

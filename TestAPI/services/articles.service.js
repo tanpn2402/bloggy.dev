@@ -31,7 +31,7 @@ module.exports = {
                     articles.map(article => ctx.call("users.get", { id: article.author }).then(res => article.author = {
                         username: res.username,
                         email: res.email,
-                        image: res.image || '/assets/images/avt.png'
+                        image: res.image || '/assets/images/default/smiley-cyrus.jpg'
                     }))
                 );
             },
@@ -56,7 +56,10 @@ module.exports = {
             description: { type: "string", min: 1 },
             body: { type: "string", min: 1 },
             tagList: { type: "array", items: "string", optional: true },
-        }
+        },
+
+        // Base path
+        rest: "articles/"
     },
 
 	/**
@@ -222,13 +225,13 @@ module.exports = {
                 let countParams;
 
                 return this.Promise.resolve()
-                    // .then(() => {
-                    //     return ctx.call("follows.find", { fields: ["follow"], query: { user: ctx.meta.user._id.toString() } })
-                    //         .then(list => {
-                    //             const authors = _.uniq(_.compact(_.flattenDeep(list.map(o => o.follow))));
-                    //             params.query.author = { "$in": authors };
-                    //         });
-                    // })
+                    .then(() => {
+                        return ctx.call("follows.find", { fields: ["follow"], query: { user: ctx.meta.user._id.toString() } })
+                            .then(list => {
+                                const authors = _.uniq(_.compact(_.flattenDeep(list.map(o => o.follow))));
+                                params.query.author = { "$in": authors };
+                            });
+                    })
                     .then(() => {
                         countParams = Object.assign({}, params);
                         // Remove pagination params
@@ -255,6 +258,172 @@ module.exports = {
             }
         },
 
+        /**
+		 * Get an article by slug
+		 * 
+		 * @actions
+		 * @param {String} id - Article slug
+		 * 
+		 * @returns {Object} Article entity
+		 */
+        get: {
+            rest: 'GET /:id',
+            cache: {
+                keys: ["#token", "id"]
+            },
+            params: {
+                id: { type: "string" }
+            },
+            handler(ctx) {
+                return this.findBySlug(ctx.params.id)
+                    .then(entity => {
+                        if (!entity)
+                            return this.Promise.reject(new MoleculerClientError("Article not found!", 404));
+
+                        return entity;
+                    })
+                    .then(doc => this.transformDocuments(ctx, { populate: ["author", "favorited", "favoritesCount"] }, doc))
+                    .then(entity => this.transformResult(ctx, entity, ctx.meta.user));
+            }
+        },
+
+        /**
+		 * Update an article.
+		 * Auth is required!
+		 * 
+		 * @actions
+		 * @param {String} id - Article ID
+		 * @param {Object} article - Article modified fields
+		 * 
+		 * @returns {Object} Updated entity
+		 */
+        update: {
+            rest: 'PUT /:id',
+            auth: "required",
+            params: {
+                id: { type: "string" },
+                article: {
+                    type: "object", props: {
+                        title: { type: "string", min: 1, optional: true },
+                        description: { type: "string", min: 1, optional: true },
+                        body: { type: "string", min: 1, optional: true },
+                        tagList: { type: "array", items: "string", optional: true },
+                    }
+                }
+            },
+            handler(ctx) {
+                let newData = ctx.params.article;
+                newData.updatedAt = new Date();
+                // the 'id' is the slug
+                return this.Promise.resolve(ctx.params.id)
+                    .then(slug => this.findBySlug(slug))
+                    .then(article => {
+                        if (!article)
+                            return this.Promise.reject(new MoleculerClientError("Article not found", 404));
+
+                        if (article.author !== ctx.meta.user._id.toString())
+                            return this.Promise.reject(new ForbiddenError());
+
+                        const update = {
+                            "$set": newData
+                        };
+
+                        return this.adapter.updateById(article._id, update);
+                    })
+                    .then(doc => this.transformDocuments(ctx, { populate: ["author", "favorited", "favoritesCount"] }, doc))
+                    .then(entity => this.transformResult(ctx, entity, ctx.meta.user))
+                    .then(json => this.entityChanged("updated", json, ctx).then(() => json));
+            }
+        },
+
+
+		/**
+		 * Remove an article by slug
+		 * Auth is required!
+		 * 
+		 * @actions
+		 * @param {String} id - Article slug
+		 * 
+		 * @returns {Number} Count of removed articles
+		 */
+        remove: {
+            rest: "DELETE /:id",
+            auth: "required",
+            params: {
+                id: { type: "any" }
+            },
+            handler(ctx) {
+                return this.findBySlug(ctx.params.id)
+                    .then(entity => {
+                        if (!entity)
+                            return this.Promise.reject(new MoleculerClientError("Article not found!", 404));
+
+                        if (entity.author !== ctx.meta.user._id.toString())
+                            return this.Promise.reject(new ForbiddenError());
+
+                        return this.adapter.removeById(entity._id)
+                            .then(() => ctx.call("favorites.removeByArticle", { article: entity._id }))
+                            .then(json => this.entityChanged("removed", json, ctx).then(() => json));
+                    });
+            }
+        },
+
+		/**
+		 * Favorite an article
+		 * Auth is required!
+		 * 
+		 * @actions
+		 * @param {String} id - Article slug
+		 * 
+		 * @returns {Object} Updated article
+		 */
+        favorite: {
+            auth: "required",
+            params: {
+                slug: { type: "string" }
+            },
+            handler(ctx) {
+                return this.Promise.resolve(ctx.params.slug)
+                    .then(slug => this.findBySlug(slug))
+                    .then(article => {
+                        if (!article)
+                            return this.Promise.reject(new MoleculerClientError("Article not found", 404));
+
+                        return ctx.call("favorites.add", { article: article._id.toString(), user: ctx.meta.user._id.toString() }).then(() => article);
+                    })
+                    .then(doc => this.transformDocuments(ctx, { populate: ["author", "favorited", "favoritesCount"] }, doc))
+                    .then(entity => this.transformResult(ctx, entity, ctx.meta.user));
+            }
+        },
+
+		/**
+		 * Unfavorite an article
+		 * Auth is required!
+		 * 
+		 * @actions
+		 * @param {String} id - Article slug
+		 * 
+		 * @returns {Object} Updated article
+		 */
+        unfavorite: {
+            auth: "required",
+            params: {
+                slug: { type: "string" }
+            },
+            handler(ctx) {
+                return this.Promise.resolve(ctx.params.slug)
+                    .then(slug => this.findBySlug(slug))
+                    .then(article => {
+                        if (!article)
+                            return this.Promise.reject(new MoleculerClientError("Article not found", 404));
+
+                        return ctx.call("favorites.delete", { article: article._id.toString(), user: ctx.meta.user._id.toString() }).then(() => article);
+                    })
+                    .then(doc => this.transformDocuments(ctx, { populate: ["author", "favorited", "favoritesCount"] }, doc))
+                    .then(entity => this.transformResult(ctx, entity, ctx.meta.user));
+            }
+        },
+
 		/**
 		 * Get list of available tags
 		 * 
@@ -273,6 +442,120 @@ module.exports = {
                     .then(tags => ({ tags }));
             }
         },
+
+		/**
+		 * Get all comments of an article.
+		 * 
+		 * @actions
+		 * @param {String} slug - Article slug
+		 * 
+		 * @returns {Object} Comment list
+		 * 
+		 */
+        comments: {
+            cache: {
+                keys: ["#token", "slug"]
+            },
+            params: {
+                slug: { type: "string" }
+            },
+            handler(ctx) {
+                return this.Promise.resolve(ctx.params.slug)
+                    .then(slug => this.findBySlug(slug))
+                    .then(article => {
+                        if (!article)
+                            return this.Promise.reject(new MoleculerClientError("Article not found", 404));
+
+                        return ctx.call("comments.list", { article: article._id.toString() });
+                    });
+            }
+        },
+
+		/**
+		 * Add a new comment to an article.
+		 * Auth is required!
+		 * 
+		 * @actions
+		 * @param {String} slug - Article slug
+		 * @param {Object} comment - Comment fields
+		 * 
+		 * @returns {Object} Comment entity
+		 */
+        addComment: {
+            auth: "required",
+            params: {
+                slug: { type: "string" },
+                comment: { type: "object" }
+            },
+            handler(ctx) {
+                return this.Promise.resolve(ctx.params.slug)
+                    .then(slug => this.findBySlug(slug))
+                    .then(article => {
+                        if (!article)
+                            return this.Promise.reject(new MoleculerClientError("Article not found", 404));
+
+                        return ctx.call("comments.create", { article: article._id.toString(), comment: ctx.params.comment });
+                    });
+            }
+        },
+
+		/**
+		 * Update a comment.
+		 * Auth is required!
+		 * 
+		 * @actions
+		 * @param {String} slug - Article slug
+		 * @param {String} commentID - Comment ID
+		 * @param {Object} comment - Comment fields
+		 * 
+		 * @returns {Object} Comment entity
+		 */
+        updateComment: {
+            auth: "required",
+            params: {
+                slug: { type: "string" },
+                commentID: { type: "string" },
+                comment: { type: "object" }
+            },
+            handler(ctx) {
+                return this.Promise.resolve(ctx.params.slug)
+                    .then(slug => this.findBySlug(slug))
+                    .then(article => {
+                        if (!article)
+                            return this.Promise.reject(new MoleculerClientError("Article not found", 404));
+
+                        return ctx.call("comments.update", { id: ctx.params.commentID, comment: ctx.params.comment });
+                    });
+            }
+        },
+
+		/**
+		 * Remove a comment.
+		 * Auth is required!
+		 * 
+		 * @actions
+		 * @param {String} slug - Article slug
+		 * @param {String} commentID - Comment ID
+		 * 
+		 * @returns {Number} Count of removed comment
+		 */
+        removeComment: {
+            auth: "required",
+            params: {
+                slug: { type: "string" },
+                commentID: { type: "string" }
+            },
+            handler(ctx) {
+                return this.Promise.resolve(ctx.params.slug)
+                    .then(slug => this.findBySlug(slug))
+                    .then(article => {
+                        if (!article)
+                            return this.Promise.reject(new MoleculerClientError("Article not found"));
+
+                        return ctx.call("comments.remove", { id: ctx.params.commentID });
+                    });
+            }
+        }
     },
 
 	/**
