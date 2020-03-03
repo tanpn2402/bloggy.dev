@@ -112,7 +112,10 @@ module.exports = {
                     this.logger.info("onAfterCall in protected route");
                     res.setHeader("X-Custom-Header", "Authorized path");
 
-                    return data;
+                    return {
+                        code: 200,
+                        ...data
+                    }
                 },
             }
         ],
@@ -130,7 +133,7 @@ module.exports = {
                 });
 
                 res.end(JSON.stringify({
-                    errorCode: err.code,
+                    code: err.code,
                     errors: o
                 }, null, 2));
             } else {
@@ -139,7 +142,6 @@ module.exports = {
             }
             this.logResponse(req, res, err ? err.ctx : null);
         }
-
     },
 
     methods: {
@@ -209,7 +211,7 @@ module.exports = {
                         return this.Promise.reject(new ERRORS.UnAuthorizedError(ERRORS.ERR_NO_TOKEN));
                     }
                 })
-        },
+        }
     },
 
     started() {

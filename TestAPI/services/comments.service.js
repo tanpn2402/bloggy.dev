@@ -195,6 +195,30 @@ module.exports = {
                             .then(json => this.entityChanged("updated", json, ctx).then(() => json));
                     });
             }
+        },
+
+        /**
+         * Count of comments by article id
+         * 
+         * @param {String} article - Article ID
+         * 
+         * @returns {Number} Count of comments
+         */
+        count: {
+            auth: "required",
+            params: {
+                article: { type: "string" }
+            },
+            handler(ctx) {
+                return this.adapter.count({
+                    query: {
+                        article: ctx.params.article
+                    }
+                })
+                .then(comments => {
+                    return comments;
+                });
+            }
         }
     },
 

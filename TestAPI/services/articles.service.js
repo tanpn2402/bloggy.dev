@@ -15,7 +15,7 @@ module.exports = {
 	 * Default settings
 	 */
     settings: {
-        fields: ["_id", "title", "slug", "description", "body", "tagList", "createdAt", "updatedAt", "favorited", "favoritesCount", "author", "comments"],
+        fields: ["_id", "title", "slug", "description", "body", "tagList", "createdAt", "updatedAt", "favorited", "favoritesCount", "author", "comments", "commentsCount"],
 
         // Populates
         populates: {
@@ -47,6 +47,9 @@ module.exports = {
             },
             favoritesCount(ids, articles, rule, ctx) {
                 return this.Promise.all(articles.map(article => ctx.call("favorites.count", { article: article._id.toString() }).then(count => article.favoritesCount = count)));
+            },
+            commentsCount(ids, articles, rule, ctx) {
+                return this.Promise.all(articles.map(article => ctx.call("comments.count", { article: article._id.toString() }).then(count => article.commentsCount = count)));
             }
         },
 
@@ -131,7 +134,7 @@ module.exports = {
                     limit,
                     offset,
                     sort: ["-createdAt"],
-                    populate: ["author", "favorited", "favoritesCount"],
+                    populate: ["author", "favorited", "favoritesCount", "commentsCount"],
                     query: {}
                 };
                 let countParams;
@@ -182,6 +185,7 @@ module.exports = {
                         this.adapter.count(countParams)
 
                     ])).then(res => {
+                        console.log("RES", res[0]);
                         return this.transformDocuments(ctx, params, res[0])
                             .then(docs => this.transformResult(ctx, docs, ctx.meta.user))
                             .then(r => {
@@ -219,7 +223,7 @@ module.exports = {
                     limit,
                     offset,
                     sort: ["-createdAt"],
-                    populate: ["author", "favorited", "favoritesCount"],
+                    populate: ["author", "favorited", "favoritesCount", "commentsCount"],
                     query: {}
                 };
                 let countParams;
