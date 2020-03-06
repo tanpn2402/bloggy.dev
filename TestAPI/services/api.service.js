@@ -4,6 +4,7 @@ const ApiGateway = require("moleculer-web");
 const ERRORS = require("moleculer-web").Errors;
 const { ApolloService } = require("moleculer-apollo-server");
 let IO = require("socket.io");
+let path = require("path");
 
 module.exports = {
     // Define service name
@@ -119,6 +120,13 @@ module.exports = {
                 },
             }
         ],
+
+        assets: {
+			folder: path.join(__dirname, "/../../WebClient/build"),
+			options: {
+				index: "index.html"
+			}
+		},
 
         onError(req, res, err) {
             // Return with the error as JSON object
