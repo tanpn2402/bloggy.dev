@@ -12,6 +12,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { LOGOUT } from '../constants/actionTypes';
 import EditSharpIcon from '@material-ui/icons/EditSharp';
 
+console.log(process.env)
 // const LoggedOutView = props => {
 //     if (!props.currentUser) {
 //         return (
@@ -212,7 +213,7 @@ function Header(props) {
                             </Typography>
                         </Link>
                         <div className={classes.grow} />
-                        <div className={classes.search}>
+                        {/* <div className={classes.search}>
                             <div className={classes.searchIcon}>
                                 <SearchIcon />
                             </div>
@@ -224,7 +225,7 @@ function Header(props) {
                                 }}
                                 inputProps={{ 'aria-label': 'search' }}
                             />
-                        </div>
+                        </div> */}
                         <div className={classes.sectionDesktop}>
                             {props.currentUser && <>
                                 <Link to="/editor" className="nav-link">
