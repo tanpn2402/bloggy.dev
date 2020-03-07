@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { API_URL } from '../constants/constants';
 import { fade, makeStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, IconButton, Typography, InputBase, Badge, MenuItem, Menu, Container } from '@material-ui/core';
+import { AppBar, Toolbar, IconButton, Typography, InputBase, Grid, Badge, MenuItem, Menu, Container } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
@@ -12,7 +12,6 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { LOGOUT } from '../constants/actionTypes';
 import EditSharpIcon from '@material-ui/icons/EditSharp';
 
-console.log(process.env)
 // const LoggedOutView = props => {
 //     if (!props.currentUser) {
 //         return (
@@ -180,7 +179,9 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: theme.palette.primary.main,
         borderRadius: '50%',
         padding: 2,
-        color: '#FFF'
+        color: '#FFF',
+        width: 22,
+        height: 22
     }
 }));
 
@@ -239,12 +240,19 @@ function Header(props) {
                                     </Badge>
                                 </IconButton>
                                 <Link to={`/@${props.currentUser.username}`}>
-                                    <IconButton
-                                        aria-label="account of current user"
-                                        color="inherit"
-                                    >
-                                        <AccountCircle color='primary' />
-                                    </IconButton>
+                                    <Grid container wrap='no-wrap' alignItems='center' justify='center'>
+                                        <Grid item>
+                                            <IconButton
+                                                aria-label="account of current user"
+                                                color="inherit"
+                                            >
+                                                <AccountCircle color='primary' />
+                                            </IconButton>
+                                        </Grid>
+                                        <Grid item>
+                                            <span style={{color: '#000'}}>{props.currentUser.username}</span>
+                                        </Grid>
+                                    </Grid>
                                 </Link>
                                 <IconButton
                                     edge="end"
@@ -272,7 +280,7 @@ function Header(props) {
                                     open={isMenuOpen}
                                     onClose={handleMenuClose}
                                 >
-                                    <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
+                                    <MenuItem onClick={handleMenuClose}>Account Settings</MenuItem>
                                     <MenuItem onClick={() => handleMenuClose('logout')}>Logout</MenuItem>
                                 </Menu>
                             </>}
