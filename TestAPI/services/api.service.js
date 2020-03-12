@@ -52,6 +52,24 @@ module.exports = {
                                 });
                                 res.end(err.message)
                             })
+                    },
+                    "GET /:folder1/:folder2/:folder3/:filename"(req, res) {
+                        const { folder1, folder2, folder3, filename } = req.$params;
+                        const path = folder1 + "/" + folder2 + "/" + folder3 + "/" + filename;
+
+                        req.$ctx.call("image.stream", { path })
+                            .then(stream => {
+                                res.writeHead(200, {
+                                    'Content-Type': 'image/jpeg'
+                                });
+                                stream.pipe(res);
+                            })
+                            .catch(err => {
+                                res.writeHead(500, {
+                                    'Content-Type': 'text'
+                                });
+                                res.end(err.message)
+                            })
                     }
                 }
             },
