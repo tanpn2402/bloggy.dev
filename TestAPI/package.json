@@ -1,7 +1,7 @@
 {
     "name": "moleculer-store",
     "scripts": {
-        "start": "moleculer-runner services",
+        "start": "node_modules/moleculer/bin/moleculer-runner.js services",
         "dev": "moleculer-runner --repl --hot services",
         "dev:cluster": "moleculer-runner --repl --instances 4 services"
     },
