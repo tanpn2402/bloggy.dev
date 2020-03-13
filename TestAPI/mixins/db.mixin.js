@@ -5,7 +5,7 @@ const mkdir = require("mkdirp").sync;
 
 const DbService = require("moleculer-db");
 
-// process.env.MONGO_URI = "mongodb://192.168.1.29:27017/conduit";
+process.env.MONGO_URI = "mongodb://35.189.178.178:27017/wespace";
 
 module.exports = function (collection) {
     if (process.env.MONGO_URI) {
