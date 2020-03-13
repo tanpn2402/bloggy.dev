@@ -8,7 +8,7 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import App from './components/App';
 
-
+import './assets/styles/main.css';
 
 const muiTheme = createMuiTheme({
   palette: {
