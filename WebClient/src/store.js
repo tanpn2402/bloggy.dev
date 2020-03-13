@@ -5,7 +5,7 @@ import { promiseMiddleware, localStorageMiddleware } from './middleware';
 import reducer from './reducer';
 
 import { routerMiddleware } from 'react-router-redux';
-import createHistory from 'history/createHashHistory';
+const createHistory =  require('history').createHashHistory;
 
 export const history = createHistory();
 

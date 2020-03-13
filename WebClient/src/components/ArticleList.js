@@ -1,6 +1,7 @@
 import ArticlePreview from './ArticlePreview';
 import ListPagination from './ListPagination';
 import React from 'react';
+import { Typography } from '@material-ui/core';
 
 const ArticleList = props => {
     if (!props.articles) {
@@ -12,8 +13,8 @@ const ArticleList = props => {
     if (props.articles.length === 0) {
         return (
             <div className="article-preview">
-                No articles are here... yet.
-      </div>
+                <p>Hiện tại chưa có bài viết nào ở  <Typography color='primary' display='inline' component='strong'>Space</Typography>  này</p>
+            </div>
         );
     }
 

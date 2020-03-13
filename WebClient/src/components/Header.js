@@ -12,93 +12,6 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { LOGOUT } from '../constants/actionTypes';
 import EditSharpIcon from '@material-ui/icons/EditSharp';
 
-// const LoggedOutView = props => {
-//     if (!props.currentUser) {
-//         return (
-//             <ul className="nav navbar-nav pull-xs-right">
-
-//                 <li className="nav-item">
-//                     <Link to="/" className="nav-link">
-//                         Home
-//                     </Link>
-//                 </li>
-
-//                 <li className="nav-item">
-//                     <Link to="/login" className="nav-link">
-//                         Sign in
-//                     </Link>
-//                 </li>
-
-//                 <li className="nav-item">
-//                     <Link to="/register" className="nav-link">
-//                         Sign up
-//                     </Link>
-//                 </li>
-
-//             </ul>
-//         );
-//     }
-//     return null;
-// };
-
-// const LoggedInView = props => {
-//     if (props.currentUser) {
-//         return (
-//             <ul className="nav navbar-nav pull-xs-right">
-
-//                 <li className="nav-item">
-//                     <Link to="/" className="nav-link">
-//                         Home
-//                     </Link>
-//                 </li>
-
-//                 <li className="nav-item">
-//                     <Link to="/editor" className="nav-link">
-//                         <i className="ion-compose"></i>&nbsp;New Post
-//                     </Link>
-//                 </li>
-
-//                 <li className="nav-item">
-//                     <Link to="/settings" className="nav-link">
-//                         <i className="ion-gear-a"></i>&nbsp;Settings
-//                     </Link>
-//                 </li>
-
-//                 <li className="nav-item">
-//                     <Link
-//                         to={`/@${props.currentUser.username}`}
-//                         className="nav-link">
-//                         <img src={API_URL + props.currentUser.image} className="user-pic" alt={props.currentUser.username} />
-//                         {props.currentUser.username}
-//                     </Link>
-//                 </li>
-
-//             </ul>
-//         );
-//     }
-
-//     return null;
-// };
-
-// class Header extends React.Component {
-//     render() {
-//         return (
-//             <nav className="navbar navbar-light">
-//                 <div className="container">
-
-//                     <Link to="/" className="navbar-brand">
-//                         {this.props.appName.toLowerCase()}
-//                     </Link>
-
-//                     <LoggedOutView currentUser={this.props.currentUser} />
-
-//                     <LoggedInView currentUser={this.props.currentUser} />
-//                 </div>
-//             </nav>
-//         );
-//     }
-// }
-
 const useStyles = makeStyles(theme => ({
     grow: {
         flexGrow: 1,
@@ -179,9 +92,18 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: theme.palette.primary.main,
         borderRadius: '50%',
         padding: 2,
-        color: '#FFF',
-        width: 22,
-        height: 22
+        color: '#FFF'
+    },
+    userImage: {
+        borderRadius: '50%',
+        width: 24,
+        height: 24
+    },
+    danger: {
+        '&:hover': {
+            color: '#721c24',
+            backgroundColor: '#f8d7da'
+        }
     }
 }));
 
@@ -204,17 +126,16 @@ function Header(props) {
 
 
     return (
-        <div className={classes.grow}>
-            <AppBar position="static" className={classes.appRoot}>
-                <Container>
-                    <Toolbar>
-                        <Link to="/" className={classes.webTitleLink}>
-                            <Typography className={classes.title} variant="h6" noWrap>
-                                {props.appName.toLowerCase()}
-                            </Typography>
-                        </Link>
-                        <div className={classes.grow} />
-                        {/* <div className={classes.search}>
+        <>
+            <AppBar position="fixed" className={classes.appRoot}>
+                <Toolbar>
+                    <Link to="/" className={classes.webTitleLink}>
+                        <Typography className={classes.title} variant="h6" noWrap>
+                            {props.appName.toLowerCase()}
+                        </Typography>
+                    </Link>
+                    <div className={classes.grow} />
+                    {/* <div className={classes.search}>
                             <div className={classes.searchIcon}>
                                 <SearchIcon />
                             </div>
@@ -227,78 +148,82 @@ function Header(props) {
                                 inputProps={{ 'aria-label': 'search' }}
                             />
                         </div> */}
-                        <div className={classes.sectionDesktop}>
-                            {props.currentUser && <>
-                                <Link to="/editor" className="nav-link">
-                                    <IconButton aria-label="show 17 new notifications" color="inherit">
-                                        <EditSharpIcon className={classes.notificationIcon} />
-                                    </IconButton>
-                                </Link>
+                    <div className={classes.sectionDesktop}>
+                        {props.currentUser && <>
+                            <Link to="/editor" className="nav-link">
                                 <IconButton aria-label="show 17 new notifications" color="inherit">
-                                    <Badge badgeContent={17} classes={{ badge: classes.badge }}>
-                                        <NotificationsIcon className={classes.notificationIcon} />
-                                    </Badge>
+                                    <EditSharpIcon className={classes.notificationIcon} />
                                 </IconButton>
-                                <Link to={`/@${props.currentUser.username}`}>
-                                    <Grid container wrap='no-wrap' alignItems='center' justify='center'>
-                                        <Grid item>
-                                            <IconButton
-                                                aria-label="account of current user"
-                                                color="inherit"
-                                            >
-                                                <AccountCircle color='primary' />
-                                            </IconButton>
-                                        </Grid>
-                                        <Grid item>
-                                            <span style={{color: '#000'}}>{props.currentUser.username}</span>
-                                        </Grid>
+                            </Link>
+                            <IconButton aria-label="show 17 new notifications" color="inherit">
+                                <Badge badgeContent={17} classes={{ badge: classes.badge }}>
+                                    <NotificationsIcon className={classes.notificationIcon} />
+                                </Badge>
+                            </IconButton>
+                            <Link to={`/@${props.currentUser.username}`}>
+                                <Grid container wrap='no-wrap' alignItems='center' justify='center'>
+                                    <Grid item>
+                                        <IconButton
+                                            aria-label="account of current user"
+                                            color="inherit"
+                                        >
+                                            <img
+                                                src={API_URL + props.currentUser.image}
+                                                className={classes.userImage}
+                                                alt={props.currentUser.username}
+                                            />
+                                        </IconButton>
                                     </Grid>
-                                </Link>
-                                <IconButton
-                                    edge="end"
-                                    aria-label="more menu"
-                                    aria-controls="primary-search-account-menu"
-                                    aria-haspopup="true"
-                                    onClick={handleProfileMenuOpen}
-                                    color="inherit"
-                                >
-                                    <ArrowDropDownIcon />
-                                </IconButton>
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    getContentAnchorEl={null}
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'right',
-                                    }}
-                                    transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
-                                    id="primary-search-account-menu"
-                                    keepMounted
-                                    open={isMenuOpen}
-                                    onClose={handleMenuClose}
-                                >
-                                    <MenuItem onClick={handleMenuClose}>Account Settings</MenuItem>
-                                    <MenuItem onClick={() => handleMenuClose('logout')}>Logout</MenuItem>
-                                </Menu>
-                            </>}
-                            {!props.currentUser && <>
-                                &nbsp;
+                                    <Grid item>
+                                        <span style={{ color: '#000' }}>{props.currentUser.username}</span>
+                                    </Grid>
+                                </Grid>
+                            </Link>
+                            <IconButton
+                                edge="end"
+                                aria-label="more menu"
+                                aria-controls="primary-search-account-menu"
+                                aria-haspopup="true"
+                                onClick={handleProfileMenuOpen}
+                                color="inherit"
+                            >
+                                <ArrowDropDownIcon />
+                            </IconButton>
+                            <Menu
+                                anchorEl={anchorEl}
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'right',
+                                }}
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                id="primary-search-account-menu"
+                                keepMounted
+                                open={isMenuOpen}
+                                onClose={handleMenuClose}
+                            >
+                                <MenuItem onClick={handleMenuClose}>Cài đặt</MenuItem>
+                                <MenuItem onClick={() => handleMenuClose('logout')} className={classes.danger}>Đăng xuất</MenuItem>
+                            </Menu>
+                        </>}
+                        {!props.currentUser && <>
+                            &nbsp;
                                 <Link to="/register" className={classes.link}>
-                                    Sign up
+                                Đăng ký
                                 </Link>
-                                &nbsp;&nbsp;&nbsp;
+                            &nbsp;&nbsp;&nbsp;
                                 <Link to="/login" className={classes.link}>
-                                    Sign in
+                                Đăng nhập
                                 </Link>
-                            </>}
-                        </div>
-                    </Toolbar>
-                </Container>
+                        </>}
+                    </div>
+                </Toolbar>
             </AppBar>
-        </div>
+            <Toolbar />
+        </>
     );
 }
 

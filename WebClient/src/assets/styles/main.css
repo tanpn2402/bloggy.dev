@@ -1,27 +1,3 @@
-.logo-font {
-    font-family: titillium web,sans-serif
-}
-
-html {
-    position: relative;
-    min-height: 100vh;
-    padding-bottom: 100px
-}
-
-/*!* Bootstrap v4.0.0-alpha.2 (http://getbootstrap.com)
-* Copyright 2011-2016 Twitter, Inc.
-* Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)*/
-/*!normalize.css commit fe56763 | MIT License | github.com/necolas/normalize.css*/
-html {
-    font-family: sans-serif;
-    -ms-text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%
-}
-
-body {
-    margin: 0
-}
-
 article,aside,details,figcaption,figure,footer,header,main,menu,nav,section,summary {
     display: block
 }
@@ -257,30 +233,12 @@ td,th {
     }
 }
 
-html {
-    box-sizing: border-box
-}
-
 *,*::before,*::after {
     box-sizing: inherit
 }
 
 @-ms-viewport {
     width: device-width;
-}
-
-html {
-    font-size: 16px;
-    -ms-overflow-style: scrollbar;
-    -webkit-tap-highlight-color: transparent
-}
-
-body {
-    font-family: source sans pro,sans-serif;
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #373a3c;
-    background-color: #fff
 }
 
 [tabindex="-1"]:focus {
@@ -6645,17 +6603,20 @@ ul.tag-list li {
     border: none;
     border-bottom: 2px solid transparent;
     background: 0 0;
-    color: #aaa
+    color: #aaa;
+    font-size: 20px;
 }
 
-.nav-pills.outline-active .nav-link:hover {
-    color: #555
+.nav-pills.outline-active .nav-link:hover,
+.nav-pills.outline-active .nav-link:focus {
+    color: #555;
+    background-color: inherit;
 }
 
 .nav-pills.outline-active .nav-link.active {
-    background: #fff!important;
     border-bottom: 2px solid #5cb85c!important;
-    color: #5cb85c!important
+    color: #5cb85c!important;
+    font-weight: 600;
 }
 
 footer {
@@ -6740,88 +6701,8 @@ footer .attribution {
     display: block
 }
 
-.article-preview {
-    border-top: 1px solid rgba(0,0,0,.1);
-    padding: 1.5rem 0
-}
-
-.article-preview .article-meta {
-    margin: 0 0 1rem
-}
-
-.article-preview .preview-link h1 {
-    font-weight: 600!important;
-    font-size: 1.5rem!important;
-    margin-bottom: 3px
-}
-
-.article-preview .preview-link p {
-    font-weight: 300;
-    font-size: 24px;
-    color: #999;
-    margin-bottom: 15px;
-    font-size: 1rem;
-    line-height: 1.3rem
-}
-
-.article-preview .preview-link span {
-    max-width: 30%;
-    font-size: .8rem;
-    font-weight: 300;
-    color: #bbb;
-    vertical-align: middle
-}
-
-.article-preview .preview-link ul {
-    float: right;
-    max-width: 50%;
-    vertical-align: top
-}
-
-.article-preview .preview-link ul li {
-    font-weight: 300;
-    font-size: .8rem!important;
-    padding-top: 0!important;
-    padding-bottom: 0!important
-}
-
 .btn .counter {
     font-size: .8rem!important
-}
-
-.home-page .banner {
-    background: #5cb85c;
-    box-shadow: inset 0 8px 8px -8px rgba(0,0,0,.3),inset 0 -8px 8px -8px rgba(0,0,0,.3)
-}
-
-.home-page .banner p {
-    color: #fff;
-    text-align: center;
-    font-size: 1.5rem;
-    font-weight: 300!important;
-    margin-bottom: 0
-}
-
-.home-page .banner h1 {
-    text-shadow: 0 1px 3px rgba(0,0,0,.3);
-    font-weight: 700!important;
-    text-align: center;
-    font-size: 3.5rem;
-    padding-bottom: .5rem
-}
-
-.home-page .feed-toggle {
-    margin-bottom: -1px
-}
-
-.home-page .sidebar {
-    padding: 5px 10px 10px;
-    background: #f3f3f3;
-    border-radius: 4px
-}
-
-.home-page .sidebar p {
-    margin-bottom: .2rem
 }
 
 .article-page .banner {

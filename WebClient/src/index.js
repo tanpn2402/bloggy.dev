@@ -9,8 +9,12 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import App from './components/App';
 
 import './assets/styles/main.css';
+import './assets/styles/app.css';
 
 const muiTheme = createMuiTheme({
+  typography: {
+    fontFamily: 'inherit'
+  },
   palette: {
     primary: {
       main: '#5cb85c',
@@ -20,7 +24,11 @@ const muiTheme = createMuiTheme({
     // },
   },
   overrides: {
-
+    MuiButton: {
+      root: {
+        textTransform: 'inherit'
+      }
+    }
   }
 });
 

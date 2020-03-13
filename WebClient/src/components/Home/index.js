@@ -4,11 +4,16 @@ import React from 'react';
 import Tags from './Tags';
 import agent from '../../agent';
 import { connect } from 'react-redux';
+import { Grid, withStyles } from '@material-ui/core';
+import SpaceBar from '../SpaceBar';
+import classNames from 'classnames';
 import {
     HOME_PAGE_LOADED,
     HOME_PAGE_UNLOADED,
     APPLY_TAG_FILTER
 } from '../../constants/actionTypes';
+
+import '../../assets/styles/home.css';
 
 const Promise = global.Promise;
 
@@ -27,8 +32,25 @@ const mapDispatchToProps = dispatch => ({
     },
     onUnload: () => {
         dispatch({ type: HOME_PAGE_UNLOADED })
+    },
+    onClickSpace: (space, pager, payload) => {
+        
     }
 });
+
+
+const styles = theme => ({
+    wrapper: {
+        paddingLeft: 10,
+        paddingRight: 10
+    },
+    mySpace: {
+    },
+    homePage: {
+        paddingLeft: 10,
+        paddingRight: 10
+    }
+})
 
 class Home extends React.Component {
     componentWillMount() {
@@ -45,33 +67,33 @@ class Home extends React.Component {
     }
 
     render() {
+        const { classes, ...props } = this.props;
+
         return (
             <div className="home-page">
-
-                <Banner token={this.props.token} appName={this.props.appName} />
-
-                <div className="container page">
-                    <div className="row">
+                <Banner token={props.token} appName={props.appName} />
+                <Grid container className={classes.homePage}>
+                    <Grid item xs={4} sm={3} md={2} className={classNames(classes.wrapper, classes.mySpace)}>
+                        <SpaceBar 
+                            onClickSpace={props.onClickSpace}
+                        />
+                    </Grid>
+                    <Grid item xs={5} sm={6} md={8} className={classes.wrapper}>
                         <MainView />
-
-                        <div className="col-md-3">
-                            <div className="sidebar">
-
-                                <p>Popular Tags</p>
-
-                                <Tags
-                                    tags={this.props.tags}
-                                    onClickTag={this.props.onClickTag}
-                                />
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                    </Grid>
+                    <Grid item xs={3} sm={3} md={2} className={classes.wrapper}>
+                        <p style={{ display: 'flex', alignItems: 'center' }}>
+                            <strong style={{ fontSize: 30 }}>#</strong>&nbsp;&nbsp;thịnh thành
+                        </p>
+                        <Tags
+                            tags={props.tags}
+                            onClickTag={props.onClickTag}
+                        />
+                    </Grid>
+                </Grid>
             </div>
         );
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Home);
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Home));
