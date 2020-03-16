@@ -34,7 +34,7 @@ const mapDispatchToProps = dispatch => ({
         dispatch({ type: HOME_PAGE_UNLOADED })
     },
     onClickSpace: (space, pager, payload) => {
-        
+
     }
 });
 
@@ -53,6 +53,16 @@ const styles = theme => ({
 })
 
 class Home extends React.Component {
+    constructor(props) {
+        super(props);
+        console.log(this.props)
+
+        this.onClickTag = (tag, pager, payload) => {
+            this.props.history.push('/?tag=' + tag)
+            this.props.onClickTag(tag, pager, payload);
+        }
+    }
+
     componentWillMount() {
         const tab = this.props.token ? 'feed' : 'all';
         const articlesPromise = this.props.token ?
@@ -74,7 +84,7 @@ class Home extends React.Component {
                 <Banner token={props.token} appName={props.appName} />
                 <Grid container className={classes.homePage}>
                     <Grid item xs={4} sm={3} md={2} className={classNames(classes.wrapper, classes.mySpace)}>
-                        <SpaceBar 
+                        <SpaceBar
                             onClickSpace={props.onClickSpace}
                         />
                     </Grid>
@@ -87,7 +97,7 @@ class Home extends React.Component {
                         </p>
                         <Tags
                             tags={props.tags}
-                            onClickTag={props.onClickTag}
+                            onClickTag={this.onClickTag}
                         />
                     </Grid>
                 </Grid>

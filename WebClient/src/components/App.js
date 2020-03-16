@@ -15,6 +15,7 @@ const Register = React.lazy(() => import('../components/Register'));
 const Settings = React.lazy(() => import('../components/Settings'));
 const Editor = React.lazy(() => import('../components/Editor'));
 const Article = React.lazy(() => import('../components/Article'));
+const NewSpace = React.lazy(() => import('../components/NewSpace'));
 
 
 const mapStateToProps = state => {
@@ -63,6 +64,7 @@ class App extends React.Component {
                         <Switch>
                             <Route exact path="/" component={Home} />
                             <Route path="/login" component={Login} />
+                            <Route path="/new-space" component={NewSpace} />
                             <Route path="/register" component={Register} />
                             <Route path="/editor/:slug" component={Editor} />
                             <Route path="/editor" component={Editor} />

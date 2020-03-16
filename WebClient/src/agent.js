@@ -43,7 +43,8 @@ const Tags = {
 };
 
 const limit = (count, p) => `limit=${count}&offset=${p ? p * count : 0}`;
-const omitSlug = article => Object.assign({}, article, { slug: undefined })
+const omitSlug = data => Object.assign({}, data, { slug: undefined });
+
 const Articles = {
   all: page =>
     requests.get(`/articles?${limit(10, page)}`),
@@ -87,11 +88,19 @@ const Profile = {
     requests.del(`/profiles/${username}/follow`)
 };
 
+const Spaces = {
+  update: space =>
+    requests.put(`/spaces/${space.slug}`, { space: omitSlug(space) }),
+  create: space =>
+    requests.post('/spaces', { space })
+};
+
 export default {
   Articles,
   Auth,
   Comments,
   Profile,
   Tags,
+  Spaces,
   setToken: _token => { token = _token; }
 };

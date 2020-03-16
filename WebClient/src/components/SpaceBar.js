@@ -5,6 +5,7 @@ import { fade, makeStyles } from '@material-ui/core/styles';
 import { AppBar, Toolbar, IconButton, Typography, InputBase, Grid, Badge, MenuItem, Menu, Container, Tooltip, Button } from '@material-ui/core';
 import { LOGOUT } from '../constants/actionTypes';
 import CodeIcon from '@material-ui/icons/Code';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
     sideBar: {
@@ -61,7 +62,9 @@ function SpaceBar(props) {
             </Grid>)}
             <br />
             <p>Cần thêm không gian để sáng tạo, trao đổi hay là tranh luận? Hãy tạo <strong>Space</strong> mới ngay</p>
-            <Button color='primay' color='primary' fullWidth size='large'>Tạo&nbsp;&nbsp;<strong>Space</strong></Button>
+            <Link to='/new-space'>
+                <Button color='primay' color='primary' fullWidth size='large'>Tạo&nbsp;&nbsp;<strong>Space</strong></Button>
+            </Link>
             <br />
             <br />
         </div>

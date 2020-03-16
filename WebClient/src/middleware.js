@@ -23,7 +23,11 @@ const promiseMiddleware = store => next => action => {
         console.log('promiseMiddleware result: ', res);
         action.payload = res;
         store.dispatch({ type: ASYNC_END, promise: action.payload });
-        store.dispatch(action);
+        if (typeof action.callback == 'function') {
+          action.callback(action);
+        } else {
+          store.dispatch(action);
+        }
       },
       error => {
         const currentState = store.getState()

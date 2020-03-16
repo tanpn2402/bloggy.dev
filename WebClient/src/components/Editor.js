@@ -10,6 +10,7 @@ import {
     EDITOR_PAGE_UNLOADED,
     UPDATE_FIELD_EDITOR
 } from '../constants/actionTypes';
+import { Container, TextField, Button, Grid, FormGroup, FormControl, FormLabel, Chip, withStyles } from '@material-ui/core';
 
 const mapStateToProps = state => ({
     ...state.editor
@@ -34,8 +35,7 @@ class Editor extends React.Component {
     constructor() {
         super();
 
-        const updateFieldEvent =
-            key => ev => this.props.onUpdateField(key, ev.target.value);
+        const updateFieldEvent = key => ev => this.props.onUpdateField(key, ev.target.value);
         this.changeTitle = updateFieldEvent('title');
         this.changeDescription = updateFieldEvent('description');
         this.changeBody = updateFieldEvent('body');
@@ -92,87 +92,103 @@ class Editor extends React.Component {
     }
 
     render() {
-        return (
-            <div className="editor-page">
-                <div className="container page">
-                    <div className="row">
-                        <div className="col-md-10 offset-md-1 col-xs-12">
+        const { classes } = this.props;
 
-                            <ListErrors errors={this.props.errors}></ListErrors>
+        return <>
+            <Container maxWidth='md' className={classes.container}>
+                <ListErrors errors={this.props.errors}></ListErrors>
 
-                            <form>
-                                <fieldset>
+                <FormControl component='fieldset' fullWidth margin='normal'>
+                    <FormLabel>Tiêu đề</FormLabel>
+                    <TextField
+                        multiline
+                        variant='outlined'
+                        fullWidth
+                        value={this.props.title}
+                        onChange={this.changeTitle}
+                    />
+                </FormControl>
 
-                                    <fieldset className="form-group">
-                                        <input
-                                            className="form-control form-control-lg"
-                                            type="text"
-                                            placeholder="Article Title"
-                                            value={this.props.title}
-                                            onChange={this.changeTitle} />
-                                    </fieldset>
+                <FormControl component='fieldset' fullWidth margin='normal'>
+                    <FormLabel>Bài viết này nói về gì?</FormLabel>
+                    <TextField
+                        multiline
+                        variant='outlined'
+                        fullWidth
+                        value={this.props.description}
+                        onChange={this.changeDescription}
+                    />
+                </FormControl>
 
-                                    <fieldset className="form-group">
-                                        <input
-                                            className="form-control"
-                                            type="text"
-                                            placeholder="What's this article about?"
-                                            value={this.props.description}
-                                            onChange={this.changeDescription} />
-                                    </fieldset>
+                <FormControl component='fieldset' fullWidth margin='normal'>
+                    <FormLabel>Nội dung</FormLabel>
+                    <FormLabel>Note: bạn có thể viết dưới dạng markdown</FormLabel>
+                    <TextField
+                        multiline
+                        variant='outlined'
+                        fullWidth
+                        value={this.props.body}
+                        onChange={this.changeBody}
+                    />
+                </FormControl>
 
-                                    <fieldset className="form-group">
-                                        <textarea
-                                            className="form-control"
-                                            rows="8"
-                                            placeholder="Write your article (in markdown)"
-                                            value={this.props.body}
-                                            onChange={this.changeBody}>
-                                        </textarea>
-                                    </fieldset>
+                <FormControl component='fieldset' fullWidth margin='normal'>
+                    <FormLabel>Thẻ tags</FormLabel>
+                    <TextField
+                        variant='outlined'
+                        fullWidth
+                        value={this.props.tagInput}
+                        onChange={this.changeTagInput}
+                        onKeyUp={this.watchForEnter}
+                    />
 
-                                    <fieldset className="form-group">
-                                        <input
-                                            className="form-control"
-                                            type="text"
-                                            placeholder="Enter tags"
-                                            value={this.props.tagInput}
-                                            onChange={this.changeTagInput}
-                                            onKeyUp={this.watchForEnter} />
-
-                                        <div className="tag-list">
-                                            {
-                                                (this.props.tagList || []).map(tag => {
-                                                    return (
-                                                        <span className="tag-default tag-pill" key={tag}>
-                                                            <i className="ion-close-round"
-                                                                onClick={this.removeTagHandler(tag)}>
-                                                            </i>
-                                                            {tag}
-                                                        </span>
-                                                    );
-                                                })
-                                            }
-                                        </div>
-                                    </fieldset>
-
-                                    <button
-                                        className="btn btn-lg pull-xs-right btn-primary"
-                                        type="button"
-                                        disabled={this.props.inProgress}
-                                        onClick={this.submitForm}>
-                                        Publish Article
-                  </button>
-
-                                </fieldset>
-                            </form>
-
-                        </div>
+                    <div className="tag-list">
+                        {
+                            (this.props.tagList || []).map(tag => {
+                                return <Chip color='primary'
+                                    key={tag}
+                                    label={tag}
+                                    onDelete={this.removeTagHandler(tag)}
+                                    className={classes.chip}
+                                />
+                            })
+                        }
                     </div>
-                </div>
-            </div>
-        );
+                </FormControl>
+            </Container>
+            <Container maxWidth='md' className={classes.groupBtn}>
+                <Grid container justify='flex-end'>
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        type="button"
+                        size='large'
+                        disabled={this.props.inProgress}
+                        onClick={this.submitForm}
+                    >
+                        Đăng bài viết
+                        </Button>
+                </Grid>
+            </Container>
+        </>
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Editor);
+const styles = () => ({
+    container: {
+        backgroundColor: '#FFF'
+    },
+    chip: {
+        marginTop: 10,
+        marginRight: 10
+    },
+    groupBtn: {
+        paddingTop: 10,
+        paddingBottom: 10,
+        position: 'sticky',
+        bottom: 0,
+        backgroundColor: '#FFF'
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Editor));

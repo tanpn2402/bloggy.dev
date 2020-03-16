@@ -105,6 +105,9 @@ module.exports = {
                     "REST /articles": "articles",
                     "GET /tags": "articles.tags",
 
+                    // Spaces
+                    "REST /spaces": "spaces",
+
                     // Comments
                     "GET /articles/:slug/comments": "articles.comments",
                     "POST /articles/:slug/comments": "articles.addComment",

@@ -74,7 +74,8 @@ const MainView = props => {
                     <YourFeedTab
                         token={props.token}
                         tab={props.tab}
-                        onTabClick={props.onTabClick} />
+                        onTabClick={props.onTabClick}
+                    />
 
                     <GlobalFeedTab tab={props.tab} onTabClick={props.onTabClick} />
 
@@ -88,7 +89,8 @@ const MainView = props => {
                 articles={props.articles}
                 loading={props.loading}
                 articlesCount={props.articlesCount}
-                currentPage={props.currentPage} />
+                currentPage={props.currentPage}
+            />
         </div>
     );
 };
