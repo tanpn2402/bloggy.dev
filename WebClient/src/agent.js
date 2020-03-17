@@ -97,6 +97,8 @@ const Spaces = {
         requests.get(`/spaces?author=${encode(author)}&${limit(5, page)}`),
     byFollowed: (username, page) =>
         requests.get(`/spaces?username=${username}&favourite=1&${limit(5, page)}`),
+    byRecommended: (page) =>
+        requests.get(`/spaces/recommended?${limit(5, page)}`),
     update: space =>
         requests.put(`/spaces/${space.slug}`, { space: omitSlug(space) }),
     create: space =>

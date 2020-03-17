@@ -137,7 +137,7 @@ module.exports = {
         },
 
         /**
-		 * Get an space by id
+		 * Get a space by id
 		 * 
 		 * @actions
 		 * @param {String} id - space id
@@ -162,6 +162,85 @@ module.exports = {
                     })
                     .then(doc => this.transformDocuments(ctx, { populate: ["author", "favorited", "favoritesCount"] }, doc))
                     .then(entity => this.transformResult(ctx, entity, ctx.meta.user));
+            }
+        },
+
+        /**
+		 * Get recommended spaces
+		 * 
+		 * @actions
+		 * 
+		 * @returns {Object} Space entity
+		 */
+        recommended: {
+            cache: {
+                // keys: ["id"]
+            },
+            params: {
+                limit: { type: "number", optional: true, convert: true },
+                offset: { type: "number", optional: true, convert: true },
+            },
+            handler(ctx) {
+                const limit = ctx.params.limit ? Number(ctx.params.limit) : 20;
+                const offset = ctx.params.offset ? Number(ctx.params.offset) : 0;
+
+                let params = {
+                    limit,
+                    offset,
+                    sort: ["-createdAt"],
+                    query: {}
+                };
+                let countParams;
+
+                return this.getById(ctx.params.id)
+                    .then(() => {
+                        countParams = Object.assign({}, params);
+                        // Remove pagination params
+                        if (countParams && countParams.limit)
+                            countParams.limit = null;
+                        if (countParams && countParams.offset)
+                            countParams.offset = null;
+                    })
+                    .then(() => this.Promise.all([
+                        // Get rows
+                        this.adapter.find(params),
+
+                        // Get count of all rows
+                        this.adapter.count(countParams)
+
+                    ])).then(res => {
+                        return this.transformDocuments(ctx, params, res[0])
+                            .then(docs => this.transformResult(ctx, docs, ctx.meta.user))
+                            .then(r => {
+                                r.spacesCount = res[1];
+                                return r;
+                            });
+                    });
+            }
+        },
+
+
+		/**
+		 * Follow space
+		 * 
+		 * @actions
+		 * 
+		 * @param {String} space - space_id
+		 */
+        follow: {
+            params: {
+                space: { type: "string" },
+            },
+            handler(ctx) {
+                return this.getById(ctx.params.space)
+                    .then(space => {
+                        if (!space)
+                            return this.Promise.reject(new MoleculerClientError("Space not found!", 404));
+
+                        return ctx.call("follow_spaces.add", { user: ctx.meta.user._id.toString(), space: space })
+                            .then(() => this.transformDocuments(ctx, {}, user));
+                    })
+                    .then(user => this.transformProfile(ctx, user, ctx.meta.user));
             }
         },
 

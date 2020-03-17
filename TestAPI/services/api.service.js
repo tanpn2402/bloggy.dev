@@ -106,6 +106,9 @@ module.exports = {
                     "GET /tags": "articles.tags",
 
                     // Spaces
+                    "GET /spaces/recommended": "spaces.recommended",
+                    "POST /spaces/:space/follow": "spaces.follow",
+                    "DELETE /spaces/:space/follow": "spaces.unfollow",
                     "REST /spaces": "spaces",
 
                     // Comments
@@ -117,7 +120,6 @@ module.exports = {
                     // Favorites
                     "POST /articles/:slug/favorite": "articles.favorite",
                     "DELETE /articles/:slug/favorite": "articles.unfavorite",
-
 
                     // Profile
                     "GET /profiles/:username": "users.profile",

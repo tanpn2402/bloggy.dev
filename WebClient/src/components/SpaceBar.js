@@ -128,11 +128,18 @@ class SpaceBar extends React.Component {
 
     componentWillMount() {
         const { currentUser } = this.props;
+        if (currentUser) {
+            this.props.onLoad(Promise.all([agent.Spaces.byAuthor(currentUser.username), agent.Spaces.byFollowed(currentUser.username)]),
+                ({ payload }) => {
 
-        this.props.onLoad(Promise.all([agent.Spaces.byAuthor(currentUser.username), agent.Spaces.byFollowed(currentUser.username)]),
-            ({ payload }) => {
+                })
+        }
+        else {
+            this.props.onLoad(Promise.all([agent.Spaces.byRecommended()]),
+                ({ payload }) => {
 
-            })
+                })
+        }
     }
 
     render() {
