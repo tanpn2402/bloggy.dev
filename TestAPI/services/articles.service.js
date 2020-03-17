@@ -15,7 +15,7 @@ module.exports = {
 	 * Default settings
 	 */
     settings: {
-        fields: ["_id", "title", "slug", "description", "body", "tagList", "createdAt", "updatedAt", "favorited", "favoritesCount", "author", "comments", "commentsCount"],
+        fields: ["_id", "title", "slug", "description", "body", "tagList", "space", "createdAt", "updatedAt", "favorited", "favoritesCount", "author", "comments", "commentsCount"],
 
         // Populates
         populates: {
@@ -58,6 +58,7 @@ module.exports = {
             title: { type: "string", min: 1 },
             description: { type: "string", min: 1 },
             body: { type: "string", min: 1 },
+            space: { type: "string", min: 1 },
             tagList: { type: "array", items: "string", optional: true },
         },
 
@@ -107,6 +108,7 @@ module.exports = {
 		 * 
 		 * @actions
 		 * @param {String} tag - Filter for 'tag'
+		 * @param {String} space - Filter for 'space'
 		 * @param {String} author - Filter for author ID
 		 * @param {String} favorited - Filter for favorited author
 		 * @param {Number} limit - Pagination limit
@@ -121,6 +123,7 @@ module.exports = {
             },
             params: {
                 tag: { type: "string", optional: true },
+                space: { type: "string", optional: true },
                 author: { type: "string", optional: true },
                 favorited: { type: "string", optional: true },
                 limit: { type: "number", optional: true, convert: true },
@@ -139,8 +142,13 @@ module.exports = {
                 };
                 let countParams;
 
-                if (ctx.params.tag)
+                if (ctx.params.tag) {
                     params.query.tagList = { "$in": [ctx.params.tag] };
+                }
+
+                if(ctx.params.space) {
+                    params.query.space = ctx.params.space;
+                }
 
                 return this.Promise.resolve()
                     .then(() => {

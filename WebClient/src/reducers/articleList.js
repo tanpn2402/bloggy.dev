@@ -39,42 +39,32 @@ export default (state = {}, action) => {
     case APPLY_TAG_FILTER:
       return {
         ...state,
-        pager: action.pager,
         articles: action.payload.articles,
         articlesCount: action.payload.articlesCount,
-        tab: null,
-        tag: action.tag,
         currentPage: 0
       };
     case HOME_PAGE_LOADED:
+      console.log(action.payload)
       return {
         ...state,
-        pager: action.pager,
         tags: action.payload[0].tags,
         articles: action.payload[1].articles,
         articlesCount: action.payload[1].articlesCount,
         currentPage: 0,
-        tab: action.tab
       };
     case HOME_PAGE_UNLOADED:
       return {};
     case CHANGE_TAB:
       return {
         ...state,
-        pager: action.pager,
         articles: action.payload.articles,
         articlesCount: action.payload.articlesCount,
-        tab: action.tab,
         currentPage: 0,
-        tag: null
       };
     case PROFILE_PAGE_LOADED:
     case PROFILE_FAVORITES_PAGE_LOADED:
-
-      console.log('article')
       return {
         ...state,
-        pager: action.pager,
         articles: action.payload[1].articles,
         articlesCount: action.payload[1].articlesCount,
         currentPage: 0

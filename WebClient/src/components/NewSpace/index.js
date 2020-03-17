@@ -1,7 +1,7 @@
 import React from 'react';
 import agent from '../../agent';
 import { connect } from 'react-redux';
-import { Container, TextField, Button, Grid, FormGroup, FormControl, FormLabel, Chip, withStyles, Typography, Divider, Radio, RadioGroup, FormControlLabel, Icon } from '@material-ui/core';
+import { Container, TextField, Button, Grid, FormGroup, FormControl, FormLabel, Chip, withStyles, Typography, Divider, Radio, RadioGroup, FormControlLabel, Icon, Collapse } from '@material-ui/core';
 import classNames from 'classnames';
 import ListErrors from '../ListErrors';
 import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
@@ -11,6 +11,10 @@ import SchoolIcon from '@material-ui/icons/School';
 import CodeIcon from '@material-ui/icons/Code';
 import ForumIcon from '@material-ui/icons/Forum';
 import AspectRatioIcon from '@material-ui/icons/AspectRatio';
+import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import MusicNoteIcon from '@material-ui/icons/MusicNote';
+import MovieIcon from '@material-ui/icons/Movie';
+import MenuBookIcon from '@material-ui/icons/MenuBook';
 
 const Promise = global.Promise;
 
@@ -21,6 +25,17 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     onSubmit: (payload, callback) => dispatch({ payload, callback }),
 });
+
+const TYPE = [
+    { type: 'work', icon: WorkIcon, label: 'Công việc' },
+    { type: 'school', icon: SchoolIcon, label: 'Trường/Lớp' },
+    { type: 'code', icon: CodeIcon, label: 'Lập trình' },
+    { type: 'music', icon: MusicNoteIcon, label: 'Âm nhạc' },
+    { type: 'movie', icon: MovieIcon, label: 'Phim ảnh' },
+    { type: 'book', icon: MenuBookIcon, label: 'Sách truyện' },
+    { type: 'forum', icon: ForumIcon, label: 'Thảo luận' },
+    { type: 'other', icon: AspectRatioIcon, label: 'Khác' },
+]
 
 class NewSpace extends React.Component {
     constructor(props) {
@@ -69,6 +84,7 @@ class NewSpace extends React.Component {
 
     render() {
         const { classes } = this.props;
+        const { ...state } = this.state;
 
         return <>
             <Container maxWidth='md' className={classes.container}>
@@ -83,7 +99,7 @@ class NewSpace extends React.Component {
                         multiline
                         variant='outlined'
                         fullWidth
-                        value={this.state.name}
+                        value={state.name}
                         onChange={this.changeName}
                     />
                 </FormControl>
@@ -95,7 +111,7 @@ class NewSpace extends React.Component {
                         multiline
                         variant='outlined'
                         fullWidth
-                        value={this.state.description}
+                        value={state.description}
                         onChange={this.changeDescription}
                     />
                 </FormControl>
@@ -105,7 +121,7 @@ class NewSpace extends React.Component {
                 <Divider />
 
                 <FormControl component="fieldset" fullWidth margin='normal'>
-                    <RadioGroup aria-label="visibility" onChange={this.changeVisibility} value={this.state.visibility}>
+                    <RadioGroup aria-label="visibility" onChange={this.changeVisibility} value={state.visibility}>
                         <FormControlLabel value="public" control={<Radio color='primary' />} label={<div>
                             <Grid container><PeopleAltIcon color='primary' />&nbsp;Công khai</Grid>
                             <small>&nbsp;&nbsp;Bất ai đều có thể xem các bài đăng, nội dung của  &nbsp;
@@ -122,32 +138,41 @@ class NewSpace extends React.Component {
 
                 <Divider />
 
-                <Divider />
-
                 <FormControl component="fieldset" fullWidth margin='normal'>
-                    <RadioGroup aria-label="type" onChange={this.changeType} value={this.state.type}
-                        style={{ flexDirection: 'row' }}>
-                        <FormControlLabel value="work" control={<Radio color='primary' />} label={<Grid container>
-                            <WorkIcon color='primary' />
-                            &nbsp;Công việc
-                        </Grid>} />
-                        <FormControlLabel value="school" control={<Radio color='primary' />} label={<Grid container>
-                            <SchoolIcon color='primary' />
-                            &nbsp;Trường/Lớp
-                        </Grid>} />
-                        <FormControlLabel value="code" control={<Radio color='primary' />} label={<Grid container>
-                            <CodeIcon color='primary' />
-                            &nbsp;Lập trình
-                        </Grid>} />
-                        <FormControlLabel value="forum" control={<Radio color='primary' />} label={<Grid container>
-                            <ForumIcon color='primary' />
-                            &nbsp;Thảo luận
-                        </Grid>} />
-                        <FormControlLabel value="other" control={<Radio color='primary' />} label={<Grid container>
-                            <AspectRatioIcon color='primary' />
-                            &nbsp;Khác
-                        </Grid>} />
-                    </RadioGroup>
+                    <Grid container wrap='nowrap'
+                        className={classes.spaceTypeCollapse}
+                        onClick={() => this.setState({ isOpenSpaceType: !state.isOpenSpaceType })}
+                    >
+                        <Grid item container alignItems='center'>
+                            {(function () {
+                                let selected = TYPE.filter(e => e.type === state.type);
+                                let Icon = selected[0].icon;
+                                return <><Icon color='primary' />&nbsp;{selected[0].label}</>
+                            }).call()}
+                        </Grid>
+                        <Grid item>
+                            <Grid container alignItems='center'>
+                                <KeyboardArrowDownIcon color='primary' />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Collapse in={state.isOpenSpaceType}>
+                        <RadioGroup aria-label="type" onChange={this.changeType} value={state.type}>
+                            {TYPE.map(e => {
+                                let Icon = e.icon;
+                                return <FormControlLabel key={e.type}
+                                    value={e.type}
+                                    control={<Radio color='primary' />}
+                                    label={<Grid container>
+                                        <Icon color='primary' />
+                                        &nbsp;{e.label}
+                                    </Grid>}
+                                />
+                            })}
+                        </RadioGroup>
+                    </Collapse>
+
+
                 </FormControl>
 
                 <Divider />
@@ -186,6 +211,12 @@ const styles = theme => ({
         position: 'sticky',
         bottom: 0,
         backgroundColor: '#FFF'
+    },
+    spaceTypeCollapse: {
+        borderRadius: 8,
+        border: '1px solid ' + theme.palette.primary.main,
+        cursor: 'pointer',
+        padding: 10
     }
 })
 

@@ -2,13 +2,12 @@ import ArticleList from '../ArticleList';
 import React from 'react';
 import agent from '../../agent';
 import { connect } from 'react-redux';
-import { CHANGE_TAB } from '../../constants/actionTypes';
 
 const YourFeedTab = props => {
     if (props.token) {
         const clickHandler = ev => {
             ev.preventDefault();
-            props.onTabClick('feed', agent.Articles.feed, agent.Articles.feed());
+            props.onTabClick('feed', agent.Articles.feed());
         }
 
         return (
@@ -27,7 +26,7 @@ const YourFeedTab = props => {
 const GlobalFeedTab = props => {
     const clickHandler = ev => {
         ev.preventDefault();
-        props.onTabClick('all', agent.Articles.all, agent.Articles.all());
+        props.onTabClick('all', agent.Articles.all());
     };
     return (
         <li className="nav-item">
@@ -55,14 +54,22 @@ const TagFilterTab = props => {
     );
 };
 
-const mapStateToProps = state => ({
-    ...state.articleList,
-    tags: state.home.tags,
-    token: state.common.token
-});
+const SpaceFilterTab = props => {
+    if (!props.space) {
+        return null;
+    }
 
-const mapDispatchToProps = dispatch => ({
-    onTabClick: (tab, pager, payload) => dispatch({ type: CHANGE_TAB, tab, pager, payload })
+    return (
+        <li className="nav-item">
+            <a href="" className="nav-link active">
+                &nbsp;&nbsp;<i className="ion-pound"></i>{props.space}
+            </a>
+        </li>
+    );
+};
+
+const mapStateToProps = state => ({
+    token: state.common.token
 });
 
 const MainView = props => {
@@ -81,18 +88,17 @@ const MainView = props => {
 
                     <TagFilterTab tag={props.tag} />
 
+                    <SpaceFilterTab space={props.space} />
+
                 </ul>
             </div>
 
             <ArticleList
-                pager={props.pager}
                 articles={props.articles}
                 loading={props.loading}
-                articlesCount={props.articlesCount}
-                currentPage={props.currentPage}
             />
         </div>
     );
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(MainView);
+export default connect(mapStateToProps)(MainView);

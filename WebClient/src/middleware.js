@@ -1,71 +1,72 @@
 import agent from './agent';
 import {
-  ASYNC_START,
-  ASYNC_END,
-  LOGIN,
-  LOGOUT,
-  REGISTER
+    ASYNC_START,
+    ASYNC_END,
+    LOGIN,
+    LOGOUT,
+    REGISTER
 } from './constants/actionTypes';
 
 const promiseMiddleware = store => next => action => {
-  if (isPromise(action.payload)) {
-    store.dispatch({ type: ASYNC_START, subtype: action.type });
+    if (isPromise(action.payload)) {
+        store.dispatch({ type: ASYNC_START, subtype: action.type });
 
-    const currentView = store.getState().viewChangeCounter;
-    const skipTracking = action.skipTracking;
+        const currentView = store.getState().viewChangeCounter;
+        const skipTracking = action.skipTracking;
 
-    action.payload.then(
-      res => {
-        const currentState = store.getState()
-        if (!skipTracking && currentState.viewChangeCounter !== currentView) {
-          return
-        }
-        console.log('promiseMiddleware result: ', res);
-        action.payload = res;
-        store.dispatch({ type: ASYNC_END, promise: action.payload });
-        if (typeof action.callback == 'function') {
-          action.callback(action);
-        } else {
-          store.dispatch(action);
-        }
-      },
-      error => {
-        const currentState = store.getState()
-        if (!skipTracking && currentState.viewChangeCounter !== currentView) {
-          return
-        }
-        console.log('promiseMiddleware ERROR', error);
-        action.error = true;
-        action.payload = error.response.body;
-        if (!action.skipTracking) {
-          store.dispatch({ type: ASYNC_END, promise: action.payload });
-        }
-        store.dispatch(action);
-      }
-    );
+        action.payload.then(
+            res => {
+                const currentState = store.getState()
+                if (!skipTracking && currentState.viewChangeCounter !== currentView) {
+                    return
+                }
+                console.log('promiseMiddleware result: ', res);
+                action.payload = res;
+                store.dispatch({ type: ASYNC_END, promise: action.payload });
 
-    return;
-  }
+                if (typeof action.callback == 'function') {
+                    action.callback(action);
+                } else {
+                    store.dispatch(action);
+                }
+            },
+            error => {
+                const currentState = store.getState()
+                if (!skipTracking && currentState.viewChangeCounter !== currentView) {
+                    return
+                }
+                console.log('promiseMiddleware ERROR', error);
+                action.error = true;
+                action.payload = error.response.body;
+                if (!action.skipTracking) {
+                    store.dispatch({ type: ASYNC_END, promise: action.payload });
+                }
+                store.dispatch(action);
+            }
+        );
 
-  next(action);
+        return;
+    }
+
+    next(action);
 };
 
 const localStorageMiddleware = store => next => action => {
-  if (action.type === REGISTER || action.type === LOGIN) {
-    if (action.payload.code === 200) {
-      window.localStorage.setItem('jwt', action.payload.user.token);
-      agent.setToken(action.payload.user.token);
+    if (action.type === REGISTER || action.type === LOGIN) {
+        if (action.payload.code === 200) {
+            window.localStorage.setItem('jwt', action.payload.user.token);
+            agent.setToken(action.payload.user.token);
+        }
+    } else if (action.type === LOGOUT) {
+        window.localStorage.setItem('jwt', '');
+        agent.setToken(null);
     }
-  } else if (action.type === LOGOUT) {
-    window.localStorage.setItem('jwt', '');
-    agent.setToken(null);
-  }
 
-  next(action);
+    next(action);
 };
 
 function isPromise(v) {
-  return v && typeof v.then === 'function';
+    return v && typeof v.then === 'function';
 }
 
 

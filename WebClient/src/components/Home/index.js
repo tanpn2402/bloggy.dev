@@ -7,35 +7,20 @@ import { connect } from 'react-redux';
 import { Grid, withStyles } from '@material-ui/core';
 import SpaceBar from '../SpaceBar';
 import classNames from 'classnames';
-import {
-    HOME_PAGE_LOADED,
-    HOME_PAGE_UNLOADED,
-    APPLY_TAG_FILTER
-} from '../../constants/actionTypes';
-
 import '../../assets/styles/home.css';
 
 const Promise = global.Promise;
 
 const mapStateToProps = state => ({
-    ...state.home,
     appName: state.common.appName,
     token: state.common.token
 });
 
 const mapDispatchToProps = dispatch => ({
-    onClickTag: (tag, pager, payload) => {
-        dispatch({ type: APPLY_TAG_FILTER, tag, pager, payload })
-    },
-    onLoad: (tab, pager, payload) => {
-        dispatch({ type: HOME_PAGE_LOADED, tab, pager, payload })
-    },
-    onUnload: () => {
-        dispatch({ type: HOME_PAGE_UNLOADED })
-    },
-    onClickSpace: (space, pager, payload) => {
-
-    }
+    onClickTag: (payload, callback) => dispatch({ payload, callback }),
+    onLoad: (payload, callback) => dispatch({ payload, callback }),
+    onTabClick: (payload, callback) => dispatch({ payload, callback }),
+    onClickSpace: (payload, callback) => dispatch({ payload, callback }),
 });
 
 
@@ -45,6 +30,7 @@ const styles = theme => ({
         paddingRight: 10
     },
     mySpace: {
+        // 
     },
     homePage: {
         paddingLeft: 10,
@@ -55,29 +41,105 @@ const styles = theme => ({
 class Home extends React.Component {
     constructor(props) {
         super(props);
-        console.log(this.props)
 
-        this.onClickTag = (tag, pager, payload) => {
-            this.props.history.push('/?tag=' + tag)
-            this.props.onClickTag(tag, pager, payload);
+        let searchParams = props.location.search.split('?').reduce((obj, curr) => {
+            if ([curr.split('=')[0]]) {
+                return Object.assign(obj, { [curr.split('=')[0]]: curr.split('=')[1] })
+            }
+
+            return obj;
+        })
+
+        let tab = searchParams['tab'];
+        if (tab === 'feed' && !props.token) {
+            tab = 'all';
+        }
+
+        this.state = {
+            tab,
+            tags: [],
+            articles: [],
+            loading: true,
+            tag: searchParams['tag'],
+            space: searchParams['space'],
+        }
+
+        this.onClickTag = (tag, payload) => {
+            this.setState({ tag: tag, tab: undefined, space: undefined, loading: true, articles: [] });
+            props.history.push('/?tag=' + tag);
+            props.onClickTag(payload, ({ payload }) => {
+                this.setState({
+                    loading: false,
+                    articles: payload.articles || []
+                })
+            });
+        }
+
+        this.onTabClick = (tab, payload) => {
+            this.setState({ tab: tab, tag: undefined, space: undefined, loading: true, articles: [] });
+            props.history.push('/?tab=' + tab);
+            props.onTabClick(payload, ({ payload }) => {
+                this.setState({
+                    loading: false,
+                    articles: payload.articles || []
+                })
+            });
+        }
+
+        this.onClickSpace = (space, payload) => {
+            this.setState({ space: space.name, tag: undefined, tab: undefined, loading: true, articles: [] });
+            props.history.push('/?space=' + space._id);
+            props.onClickSpace(payload, ({ payload }) => {
+                this.setState({
+                    loading: false,
+                    articles: payload.articles || []
+                })
+            });
         }
     }
 
     componentWillMount() {
-        const tab = this.props.token ? 'feed' : 'all';
-        const articlesPromise = this.props.token ?
-            agent.Articles.feed :
-            agent.Articles.all;
+        const { tab, tag, space } = this.state;
 
-        this.props.onLoad(tab, articlesPromise, Promise.all([agent.Tags.getAll(), articlesPromise()]));
+        if (tab) {
+            const articlesPromise = tab === 'feed' ? agent.Articles.feed : agent.Articles.all;
+            return this.props.onLoad(Promise.all([agent.Tags.getAll(), articlesPromise()]), ({ payload }) => {
+                this.setState({
+                    loading: false,
+                    tags: payload[0].tags || [],
+                    articles: payload[1].articles || []
+                })
+            });
+        }
+        else if (tag) {
+            return this.props.onLoad(Promise.all([agent.Tags.getAll(), agent.Articles.byTag(tag)]), ({ payload }) => {
+                this.setState({
+                    loading: false,
+                    tags: payload[0].tags || [],
+                    articles: payload[1].articles || []
+                })
+            });
+        }
+        else if (space) {
+            return this.props.onLoad(Promise.all([agent.Tags.getAll(), agent.Articles.bySpace(space), agent.Spaces.get(space)]),
+                ({ payload }) => {
+                    this.setState({
+                        loading: false,
+                        tags: payload[0].tags || [],
+                        articles: payload[1].articles || [],
+                        space: payload[2].code === 200 ? payload[2].spaces.name : 'Loading'
+                    })
+                });
+        }
     }
 
     componentWillUnmount() {
-        this.props.onUnload();
+
     }
 
     render() {
         const { classes, ...props } = this.props;
+        const { tab, tag, ...state } = this.state;
 
         return (
             <div className="home-page">
@@ -85,18 +147,26 @@ class Home extends React.Component {
                 <Grid container className={classes.homePage}>
                     <Grid item xs={4} sm={3} md={2} className={classNames(classes.wrapper, classes.mySpace)}>
                         <SpaceBar
-                            onClickSpace={props.onClickSpace}
+                            onClickSpace={this.onClickSpace}
                         />
                     </Grid>
                     <Grid item xs={5} sm={6} md={8} className={classes.wrapper}>
-                        <MainView />
+                        <MainView
+                            tab={tab}
+                            tag={tag}
+                            space={state.space}
+                            loading={state.loading}
+                            articles={state.articles}
+                            onTabClick={this.onTabClick}
+                        />
                     </Grid>
                     <Grid item xs={3} sm={3} md={2} className={classes.wrapper}>
                         <p style={{ display: 'flex', alignItems: 'center' }}>
                             <strong style={{ fontSize: 30 }}>#</strong>&nbsp;&nbsp;thịnh thành
                         </p>
                         <Tags
-                            tags={props.tags}
+                            tags={state.tags}
+                            loading={state.loading}
                             onClickTag={this.onClickTag}
                         />
                     </Grid>

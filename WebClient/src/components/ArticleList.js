@@ -1,12 +1,11 @@
 import ArticlePreview from './ArticlePreview';
-import ListPagination from './ListPagination';
 import React from 'react';
 import { Typography } from '@material-ui/core';
 
 const ArticleList = props => {
-    if (!props.articles) {
+    if (props.loading) {
         return (
-            <div className="article-preview">Loading...</div>
+            <div className="article-preview">Đang tải...</div>
         );
     }
 
@@ -28,10 +27,6 @@ const ArticleList = props => {
                 })
             }
 
-            <ListPagination
-                pager={props.pager}
-                articlesCount={props.articlesCount}
-                currentPage={props.currentPage} />
         </div>
     );
 };

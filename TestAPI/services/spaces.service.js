@@ -62,9 +62,8 @@ module.exports = {
 		 * List articles with pagination.
 		 * 
 		 * @actions
-		 * @param {String} tag - Filter for 'tag'
+		 * @param {String} type - Filter for 'type'
 		 * @param {String} author - Filter for author ID
-		 * @param {String} favorited - Filter for favorited author
 		 * @param {Number} limit - Pagination limit
 		 * @param {Number} offset - Pagination offset
 		 * 
@@ -76,7 +75,9 @@ module.exports = {
                 keys: ["#token", "tag", "author", "favorited", "limit", "offset"]
             },
             params: {
+                author: { type: "string", optional: true },
                 name: { type: "string", optional: true },
+                type: { type: "string", optional: true },
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
             },
@@ -92,7 +93,23 @@ module.exports = {
                 };
                 let countParams;
 
+                if (ctx.params.type) {
+                    params.query.type = { "$in": ctx.params.type.split(',') };
+                }
+
                 return this.Promise.resolve()
+                    .then(() => {
+                        if (ctx.params.author) {
+                            return ctx.call("users.find", { query: { username: ctx.params.author } })
+                                .then(users => {
+                                    if (users.length == 0) {
+                                        return this.Promise.reject(new MoleculerClientError("Author not found"));
+                                    }
+
+                                    params.query.author = users[0]._id;
+                                });
+                        }
+                    })
                     .then(() => {
                         countParams = Object.assign({}, params);
                         // Remove pagination params
@@ -116,6 +133,35 @@ module.exports = {
                                 return r;
                             });
                     });
+            }
+        },
+
+        /**
+		 * Get an space by id
+		 * 
+		 * @actions
+		 * @param {String} id - space id
+		 * 
+		 * @returns {Object} Space entity
+		 */
+        get: {
+            rest: 'GET /:id',
+            cache: {
+                keys: ["#token", "id"]
+            },
+            params: {
+                id: { type: "string" }
+            },
+            handler(ctx) {
+                return this.getById(ctx.params.id)
+                    .then(entity => {
+                        if (!entity)
+                            return this.Promise.reject(new MoleculerClientError("Space not found!", 404));
+
+                        return entity;
+                    })
+                    .then(doc => this.transformDocuments(ctx, { populate: ["author", "favorited", "favoritesCount"] }, doc))
+                    .then(entity => this.transformResult(ctx, entity, ctx.meta.user));
             }
         },
 
@@ -179,7 +225,18 @@ module.exports = {
             if (!entity) return this.Promise.resolve();
 
             return this.Promise.resolve(entity);
-        }
+        },
+
+        /**
+		 * Find an article by slug
+		 * 
+		 * @param {String} slug - Article slug
+		 * 
+		 * @results {Object} Promise<Article
+		 */
+        findBySlug(slug) {
+            return this.adapter.findOne({ slug });
+        },
     },
 
     events: {
