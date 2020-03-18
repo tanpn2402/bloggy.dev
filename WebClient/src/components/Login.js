@@ -8,6 +8,7 @@ import {
     LOGIN,
     LOGIN_PAGE_UNLOADED
 } from '../constants/actionTypes';
+import { GG_CLIENT_ID } from '../constants/constants';
 
 const mapStateToProps = state => ({ ...state.auth });
 
@@ -22,6 +23,8 @@ const mapDispatchToProps = dispatch => ({
         dispatch({ type: LOGIN_PAGE_UNLOADED })
 });
 
+const gapi = window.gapi;
+
 class Login extends React.Component {
     constructor() {
         super();
@@ -31,11 +34,97 @@ class Login extends React.Component {
             ev.preventDefault();
             this.props.onSubmit(email, password);
         };
+
+        this.state = {
+            isSignedIn: false
+        }
     }
 
     componentWillUnmount() {
         this.props.onUnload();
     }
+
+    componentDidMount() {
+        gapi.load('auth2', () => {
+            this.auth2 = gapi.auth2.init({
+                client_id: GG_CLIENT_ID,
+                // scope: 'profile'
+            })
+
+            this.auth2.then(
+                () => {
+                    console.log('on init');
+                    const isSignedIn = this.auth2.isSignedIn.get();
+
+                    if (isSignedIn) {
+                        var googleUser = this.auth2.currentUser.get();
+                        var profile = googleUser.getBasicProfile();
+                        console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+                        console.log('Name: ' + profile.getName());
+                        console.log('Image URL: ' + profile.getImageUrl());
+                        console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+                        var scope = googleUser.getGrantedScopes();
+                        console.log('scope ', scope);
+
+                        var token = googleUser.getAuthResponse().id_token;
+                        console.log('users token ', token);
+                    }
+
+                    this.setState({
+                        isSignedIn
+                    });
+                },
+                () => {
+                    console.log('on error');
+                }
+            );
+        })
+    }
+
+    onSignOut = ev => {
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(
+            () => {
+                console.log('User signed out.');
+
+                this.setState({
+                    isSignedIn: false
+                });
+            },
+            () => {
+                console.log('Occured some errors while signing out!');
+            }
+        );
+    }
+
+    onSignIn = ev => {
+        var auth2 = gapi.auth2.getAuthInstance();
+        let options = {
+            prompt: 'select_account'
+        }
+        auth2.signIn(options).then(
+            (user) => {
+                console.log('Sign in successully!');
+                var googleUser = this.auth2.currentUser.get()
+                console.log('users info ', googleUser);
+
+                var profile = googleUser.getBasicProfile();
+                console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+                console.log('Name: ' + profile.getName());
+                console.log('Image URL: ' + profile.getImageUrl());
+                console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+                this.setState({
+                    isSignedIn: true
+                });
+            },
+            () => {
+                console.log('Occured some errors while signing in!');
+            }
+        );
+    }
+
 
     render() {
         const email = this.props.email;
@@ -89,6 +178,10 @@ class Login extends React.Component {
 
                     </div>
                 </div>
+                <button id="loginButton" onClick={this.onSignIn}>
+                    {this.state.isSignedIn ? 'Signed with Google' : 'Login with Google'}
+                </button>
+                {this.state.isSignedIn && <button onClick={this.onSignOut}>Sign out GG</button>}
             </div>
         );
     }
