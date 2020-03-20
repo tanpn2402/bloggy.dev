@@ -9,7 +9,7 @@ module.exports = {
     logLevel: "debug",
 
     transporter: "nats://localhost:4222",
-    requestTimeout: 5 * 1000,
+    requestTimeout: 5 * 100000,
 
     circuitBreaker: {
         enabled: true

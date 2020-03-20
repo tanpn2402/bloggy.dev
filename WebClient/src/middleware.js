@@ -11,12 +11,12 @@ const promiseMiddleware = store => next => action => {
     if (isPromise(action.payload)) {
         store.dispatch({ type: ASYNC_START, subtype: action.type });
 
-        const currentView = store.getState().viewChangeCounter;
-        const skipTracking = action.skipTracking;
+        // const currentView = store.getState().viewChangeCounter;
+        // const skipTracking = action.skipTracking;
 
         action.payload.then(
             res => {
-                const currentState = store.getState()
+                // const currentState = store.getState()
                 // if (!skipTracking && currentState.viewChangeCounter !== currentView) {
                 //     return
                 // }
@@ -31,7 +31,7 @@ const promiseMiddleware = store => next => action => {
                 }
             },
             error => {
-                const currentState = store.getState()
+                // const currentState = store.getState()
                 // if (!skipTracking && currentState.viewChangeCounter !== currentView) {
                 //     return
                 // }

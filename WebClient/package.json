@@ -2,6 +2,7 @@
   "name": "wespace-web-client",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://172.16.246.139:3000",
   "devDependencies": {
     "cross-env": "^5.1.4",
     "react-scripts": "^2.1.8",

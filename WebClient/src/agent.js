@@ -4,7 +4,7 @@ import { API_URL } from './constants/constants';
 
 const superagent = superagentPromise(_superagent, global.Promise);
 
-const API_ROOT = API_URL + '/api';
+const API_ROOT = '/api';
 
 const encode = encodeURIComponent;
 const responseBody = res => res.body;
@@ -105,6 +105,11 @@ const Spaces = {
         requests.post('/spaces', { space })
 };
 
+const Assets = {
+    uploadSpaceCoverPhoto: obj =>
+        requests.post('/assets/space/upload/cover', obj)
+}
+
 export default {
     Articles,
     Auth,
@@ -112,5 +117,6 @@ export default {
     Profile,
     Tags,
     Spaces,
+    Assets,
     setToken: _token => { token = _token; }
 };

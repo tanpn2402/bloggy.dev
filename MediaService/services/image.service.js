@@ -1,36 +1,17 @@
 var fs = require('fs');
-
-function base64_encode(file) {
-    // read binary data
-    var bitmap = fs.readFileSync(file);
-    // convert binary data to base64 encoded string
-    return new Buffer(bitmap).toString('base64');
-}
-
+var path = require('path');
 
 module.exports = {
     // Define service name
     name: "image",
 
     actions: {
-        get(ctx) {
-            let d = base64_encode('./assets/images/index.jpeg');
-
-            // ctx.meta.$responseType = "image/jpeg";
-            // ctx.meta.$contentLength = d.length;
-            // ctx.meta.$responseHeaders = {
-            //     "Content-Disposition": `attachment; filename="data-${ctx.params.id}.csv"`
-            // };
-
-            // return "I'm image service";
-            return d;
-        },
         stream(ctx) {
-            const path = './assets/' + ctx.params.path;
+            const pathAssets = './assets/' + ctx.params.path;
 
             try {
-                if (fs.existsSync(path)) {
-                    return fs.createReadStream(path);
+                if (fs.existsSync(pathAssets)) {
+                    return fs.createReadStream(pathAssets);
                 }
                 throw "FILE NOT FOUND";
             }
@@ -38,5 +19,48 @@ module.exports = {
                 return this.Promise.reject(err);
             }
         },
+        uploadSpaceCover(ctx) {
+            const pathAssets = './assets/images/space/cover';
+
+            if (!fs.existsSync(pathAssets)) {
+                fs.mkdirSync(pathAssets);
+            }
+
+            return new this.Promise((resolve, reject) => {
+                const filePath = path.join(pathAssets, this.uniqueName(ctx.meta.$multipart));
+                const f = fs.createWriteStream(filePath);
+                f.on("close", () => {
+                    // File written successfully
+                    this.logger.info(`Uploaded file stored in '${filePath}'`);
+                    resolve({ filePath, code: 200 });
+                });
+
+                ctx.params.on("error", err => {
+                    this.logger.info("File error received", err.message);
+                    resolve({ err, code: 500 });
+
+                    // Destroy the local file
+                    f.destroy(err);
+                });
+
+                f.on("error", (err) => {
+                    this.logger.info("File error received", err.message);
+                    // Remove the errored file.
+                    fs.unlinkSync(filePath);
+                    resolve({ err, code: 500 });
+                });
+
+                ctx.params.pipe(f);
+            });
+        }
+    },
+    methods: {
+        uniqueName(multipart) {
+            let { fname } = multipart;
+            let ext = fname.split('.')[fname.split('.').length - 1];
+            fname = fname.replace(new RegExp(ext, 'g'), '');
+
+            return fname + "_" + Date.now() + "." + ext;
+        }
     }
 }

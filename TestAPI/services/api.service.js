@@ -29,6 +29,10 @@ module.exports = {
                 path: '/assets',
                 authentication: false,
                 authorization: false,
+                bodyParsers: {
+                    json: false,
+                    urlencoded: false
+                },
                 aliases: {
                     /**
                      * get image
@@ -57,7 +61,7 @@ module.exports = {
                         const { folder1, folder2, folder3, filename } = req.$params;
                         const path = folder1 + "/" + folder2 + "/" + folder3 + "/" + filename;
 
-                        req.$ctx.call("image.stream", { path })
+                        req.$ctx.call("image.stream", { path, filename })
                             .then(stream => {
                                 res.writeHead(200, {
                                     'Content-Type': 'image/jpeg'
@@ -70,6 +74,14 @@ module.exports = {
                                 });
                                 res.end(err.message)
                             })
+                    },
+                    "POST /space/upload/cover": {
+                        type: "multipart",
+                        // Action level busboy config
+                        busboyConfig: {
+                            limits: { files: 10 }
+                        },
+                        action: "image.uploadSpaceCover"
                     }
                 }
             },
@@ -145,11 +157,11 @@ module.exports = {
         ],
 
         assets: {
-			folder: path.join(__dirname, "/../../WebClient/build"),
-			options: {
-				index: "index.html"
-			}
-		},
+            folder: path.join(__dirname, "/../../WebClient/build"),
+            options: {
+                index: "index.html"
+            }
+        },
 
         onError(req, res, err) {
             // Return with the error as JSON object

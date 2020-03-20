@@ -2,6 +2,7 @@ import ArticleList from '../ArticleList';
 import React from 'react';
 import agent from '../../agent';
 import { connect } from 'react-redux';
+import { Paper, Typography } from '@material-ui/core';
 
 const YourFeedTab = props => {
     if (props.token) {
@@ -68,6 +69,20 @@ const SpaceFilterTab = props => {
     );
 };
 
+const SpaceInfo = props => {
+    console.log(props);
+    if (!props.space || !props.spaceInfo) {
+        return null;
+    }
+
+    return (
+        <Paper>
+            <img src={props.spaceInfo.cover_photo} />
+            <Typography variant='h5'>{props.spaceInfo.name}</Typography>
+        </Paper>
+    );
+}
+
 const mapStateToProps = state => ({
     token: state.common.token
 });
@@ -92,6 +107,8 @@ const MainView = props => {
 
                 </ul>
             </div>
+
+            <SpaceInfo space={props.space} spaceInfo={props.spaceInfo} />
 
             <ArticleList
                 articles={props.articles}

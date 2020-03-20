@@ -87,7 +87,14 @@ class Home extends React.Component {
         }
 
         this.onClickSpace = (space, payload) => {
-            this.setState({ space: space.name, tag: undefined, tab: undefined, loading: true, articles: [] });
+            this.setState({
+                spaceInfo: space,
+                space: space.name,
+                tag: undefined,
+                tab: undefined,
+                loading: true,
+                articles: []
+            });
             props.history.push('/?space=' + space._id);
             props.onClickSpace(payload, ({ payload }) => {
                 this.setState({
@@ -127,6 +134,7 @@ class Home extends React.Component {
                         loading: false,
                         tags: payload[0].tags || [],
                         articles: payload[1].articles || [],
+                        spaceInfo: payload[2].spaces,
                         space: payload[2].code === 200 ? payload[2].spaces.name : 'Loading'
                     })
                 });
@@ -141,6 +149,8 @@ class Home extends React.Component {
         const { classes, ...props } = this.props;
         const { tab, tag, ...state } = this.state;
 
+        console.log(state)
+        
         return (
             <div className="home-page">
                 <Banner token={props.token} appName={props.appName} />
@@ -158,6 +168,7 @@ class Home extends React.Component {
                             loading={state.loading}
                             articles={state.articles}
                             onTabClick={this.onTabClick}
+                            spaceInfo={state.spaceInfo}
                         />
                     </Grid>
                     <Grid item xs={3} sm={3} md={2} className={classes.wrapper}>
