@@ -141,15 +141,9 @@ class Home extends React.Component {
         }
     }
 
-    componentWillUnmount() {
-
-    }
-
     render() {
         const { classes, ...props } = this.props;
         const { tab, tag, ...state } = this.state;
-
-        console.log(state)
         
         return (
             <div className="home-page">
@@ -169,6 +163,7 @@ class Home extends React.Component {
                             articles={state.articles}
                             onTabClick={this.onTabClick}
                             spaceInfo={state.spaceInfo}
+                            history={props.history}
                         />
                     </Grid>
                     <Grid item xs={3} sm={3} md={2} className={classes.wrapper}>

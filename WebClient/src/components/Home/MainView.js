@@ -1,8 +1,54 @@
-import ArticleList from '../ArticleList';
 import React from 'react';
+import ArticleList from '../ArticleList';
 import agent from '../../agent';
 import { connect } from 'react-redux';
-import { Paper, Typography } from '@material-ui/core';
+import { Paper, Typography, withStyles, Grid, Button, Divider } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
+import withPopup from '../../withPopup';
+
+const TYPE = require('../../constants/spaceTypes').default;
+
+const MainView = props => {
+    return (
+        <div>
+            <div className="feed-toggle">
+                <ul className="nav nav-pills outline-active">
+
+                    <YourFeedTab
+                        token={props.token}
+                        tab={props.tab}
+                        onTabClick={props.onTabClick}
+                    />
+
+                    <GlobalFeedTab
+                        tab={props.tab}
+                        onTabClick={props.onTabClick}
+                    />
+
+                    <TagFilterTab tag={props.tag} />
+
+                    <SpaceFilterTab space={props.space} />
+
+                </ul>
+            </div>
+
+            <SpaceInfo
+                classes={props.classes}
+                token={props.token}
+                space={props.space}
+                spaceInfo={props.spaceInfo}
+                showPopup={props.showPopup}
+                history={props.history}
+            />
+
+            <ArticleList
+                articles={props.articles}
+                loading={props.loading}
+            />
+        </div>
+    );
+};
+
 
 const YourFeedTab = props => {
     if (props.token) {
@@ -70,52 +116,92 @@ const SpaceFilterTab = props => {
 };
 
 const SpaceInfo = props => {
-    console.log(props);
-    if (!props.space || !props.spaceInfo) {
+    const { classes, space, spaceInfo } = props;
+
+    if (!space || !spaceInfo) {
         return null;
     }
 
+    const template = TYPE.filter(e => e.type === spaceInfo.type)[0] || {};
+    const Icon = template.icon;
+
+    const onFollow = () => {
+        if (props.token) {
+
+        } else {
+            props.showPopup({
+                title: () => <Typography variant='h6' color='primary'>Theo dõi Space</Typography>,
+                body: 'Bạn cần Đăng nhập để thực hiện thao tác này.',
+                footer: () => <>
+                    <Button color='primary' variant='outlined'
+                        onClick={() => props.history.replace('/register')}>
+                        Đăng kí
+                    </Button>
+                    <Button color='primary' variant='contained'
+                        onClick={() => props.history.replace('/login')}>
+                        Đăng nhập
+                    </Button>
+                </>
+            })
+        }
+    }
+
     return (
-        <Paper>
-            <img src={props.spaceInfo.cover_photo} />
-            <Typography variant='h5'>{props.spaceInfo.name}</Typography>
+        <Paper elevation={1} className={classes.spaceInfo} >
+            <img src={spaceInfo.cover_photo} className={classes.coverPhoto} />
+            <Typography variant='h5' className={classes.spaceName}>{spaceInfo.name}</Typography>
+            <Divider />
+            <Grid container alignItems='center' spacing={4}>
+                <Grid item>
+                    <Grid container alignItems='center'>
+                        {Icon && <Icon color='primary' size='sm' />}&nbsp;
+                        <Typography>{template.label}</Typography>
+                    </Grid>
+                </Grid>
+                <Grid item>
+                    <Typography color='primary' display='inline'><b>5,393</b></Typography> người theo dõi
+                </Grid>
+                <Grid item xs />
+                <Grid item>
+                    <Button color='primary'
+                        startIcon={<AddIcon color='primary' />}
+                        onClick={onFollow}
+                    >
+                        Theo dõi
+                    </Button>
+                </Grid>
+            </Grid>
+            <Divider />
+            <Typography paragraph>
+                {spaceInfo.description}
+            </Typography>
         </Paper>
     );
 }
 
+
+const styles = theme => {
+    console.log(theme);
+
+    return ({
+        spaceInfo: {
+            marginBottom: 10,
+            padding: 20
+        },
+        coverPhoto: {
+            width: '100%',
+            borderRadius: theme.shape.borderRadius
+        },
+        spaceName: {
+            marginTop: 10,
+            marginBottom: 10
+        }
+    })
+}
+
 const mapStateToProps = state => ({
-    token: state.common.token
+    token: state.common.token,
+    currentUser: state.common.currentUser
 });
 
-const MainView = props => {
-    return (
-        <div>
-            <div className="feed-toggle">
-                <ul className="nav nav-pills outline-active">
-
-                    <YourFeedTab
-                        token={props.token}
-                        tab={props.tab}
-                        onTabClick={props.onTabClick}
-                    />
-
-                    <GlobalFeedTab tab={props.tab} onTabClick={props.onTabClick} />
-
-                    <TagFilterTab tag={props.tag} />
-
-                    <SpaceFilterTab space={props.space} />
-
-                </ul>
-            </div>
-
-            <SpaceInfo space={props.space} spaceInfo={props.spaceInfo} />
-
-            <ArticleList
-                articles={props.articles}
-                loading={props.loading}
-            />
-        </div>
-    );
-};
-
-export default connect(mapStateToProps)(MainView);
+export default connect(mapStateToProps)(withStyles(styles)(withPopup(MainView)));
