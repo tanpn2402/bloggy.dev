@@ -10,10 +10,15 @@ import {
     EDITOR_PAGE_UNLOADED,
     UPDATE_FIELD_EDITOR
 } from '../constants/actionTypes';
-import { Container, TextField, Button, Grid, FormGroup, FormControl, FormLabel, Chip, withStyles } from '@material-ui/core';
+import { Container, TextField, Button, Grid, FormGroup, FormControl, FormLabel, Chip, withStyles, Typography, FormControlLabel, Radio, Collapse, RadioGroup } from '@material-ui/core';
+import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import PersonIcon from '@material-ui/icons/Person';
+
+const TYPE = require('../constants/spaceTypes').default;
 
 const mapStateToProps = state => ({
-    ...state.editor
+    ...state.editor,
+    currentUser: state.common.currentUser
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -34,6 +39,15 @@ const mapDispatchToProps = dispatch => ({
 class Editor extends React.Component {
     constructor() {
         super();
+
+        this.state = {
+            spaces: [],
+            selectedSpace: {
+                _id: 'yourself',
+                type: 'yourself',
+                name: 'Space của bạn'
+            }
+        }
 
         const updateFieldEvent = key => ev => this.props.onUpdateField(key, ev.target.value);
         this.changeTitle = updateFieldEvent('title');
@@ -85,6 +99,15 @@ class Editor extends React.Component {
             return this.props.onLoad(agent.Articles.get(this.props.match.params.slug));
         }
         this.props.onLoad(null);
+
+        Promise.all([agent.Spaces.byAuthor(this.props.currentUser.username), agent.Spaces.byFollowed()]).then(payload => {
+            let spaces = [{
+                _id: 'yourself',
+                type: 'yourself',
+                name: 'Space của bạn'
+            }].concat(payload[0].spaces || []).concat(payload[1].spaces || []);
+            this.setState({ spaces, selectedSpace: spaces[0] })
+        })
     }
 
     componentWillUnmount() {
@@ -93,6 +116,7 @@ class Editor extends React.Component {
 
     render() {
         const { classes } = this.props;
+        const { ...state } = this.state;
 
         return <>
             <Container maxWidth='md' className={classes.container}>
@@ -154,6 +178,46 @@ class Editor extends React.Component {
                             })
                         }
                     </div>
+                </FormControl>
+
+                <FormControl component='fieldset' fullWidth margin='normal'>
+                    <FormLabel><Typography color='primary'></Typography></FormLabel>
+                    <FormLabel>Bạn đang viết vào <Typography color='primary' display='inline'></Typography> nào</FormLabel>
+
+                    <Grid container wrap='nowrap'
+                        className={classes.spaceTypeCollapse}
+                        onClick={() => this.setState({ isOpenSpaceType: !state.isOpenSpaceType })}
+                    >
+                        <Grid item container alignItems='center'>
+                            {(function () {
+                                let selected = TYPE.filter(e => e.type === state.selectedSpace.type);
+                                let Icon = (selected[0] || {}).icon || PersonIcon;
+                                return <><Icon color='primary' />&nbsp;{state.selectedSpace.name}</>
+                            }).call()}
+                        </Grid>
+                        <Grid item>
+                            <Grid container alignItems='center'>
+                                <KeyboardArrowDownIcon color='primary' />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Collapse in={state.isOpenSpaceType}>
+                        <RadioGroup aria-label="type" onChange={this.changeType} value={state.type}>
+                            {state.spaces.map(e => {
+                                let template = TYPE.filter(el => el.type === e.type);
+                                let Icon = (template[0] || {}).icon || PersonIcon;
+                                return <FormControlLabel key={e.type}
+                                    value={e.type}
+                                    control={<Radio color='primary' />}
+                                    label={<Grid container>
+                                        <Icon color='primary' />
+                                        &nbsp;{e.name}
+                                    </Grid>}
+                                />
+                            })}
+                        </RadioGroup>
+                    </Collapse>
+
                 </FormControl>
             </Container>
             <Container maxWidth='md' className={classes.groupBtn}>

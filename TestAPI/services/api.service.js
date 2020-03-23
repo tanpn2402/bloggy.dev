@@ -119,6 +119,7 @@ module.exports = {
 
                     // Spaces
                     "GET /spaces/recommended": "spaces.recommended",
+                    "GET /spaces/:user/followed": "spaces.followed",
                     "POST /spaces/:space/follow": "spaces.follow",
                     "DELETE /spaces/:space/follow": "spaces.unfollow",
                     "REST /spaces": "spaces",

@@ -22,7 +22,7 @@ class SpaceBar extends React.Component {
     componentWillMount() {
         const { currentUser } = this.props;
         if (currentUser) {
-            this.props.onLoad(Promise.all([agent.Spaces.byAuthor(currentUser.username), agent.Spaces.byFollowed(currentUser.username)]),
+            this.props.onLoad(Promise.all([agent.Spaces.byAuthor(currentUser.username), agent.Spaces.byFollowed(currentUser._id)]),
                 ({ payload }) => {
                     this.setState({
                         mySpaces: payload[0].spaces || [],
@@ -62,10 +62,10 @@ class SpaceBar extends React.Component {
                         </Link>
                         <br />
 
-                        <Typography>
-                            <Typography display='inline'><b>Spaces</b></Typography>
-                            &nbsp;được gợi ý
-                        </Typography>
+                        <p className={classes.header}>
+                            <strong style={{ fontSize: 20 }}>Spaces</strong>&nbsp;&nbsp;được gợi ý
+                        </p>
+
                         {state.recommendedSpaces.map(space =>
                             <Item key={space._id} classes={classes} space={space} onClickSpace={props.onClickSpace} />
                         )}
@@ -78,7 +78,17 @@ class SpaceBar extends React.Component {
                             <strong style={{ fontSize: 20 }}>Spaces</strong>&nbsp;&nbsp;của bạn
                         </p>
 
-                        {[].concat(state.mySpaces).concat(state.followedSpaces).map(space =>
+                        {state.mySpaces.map(space =>
+                            <Item key={space._id} classes={classes} space={space} onClickSpace={props.onClickSpace} />
+                        )}
+
+                        <br />
+
+                        <p className={classes.header}>
+                            <strong style={{ fontSize: 20 }}>Spaces</strong>&nbsp;&nbsp;bạn đang theo dõi
+                        </p>
+
+                        {state.followedSpaces.map(space =>
                             <Item key={space._id} classes={classes} space={space} onClickSpace={props.onClickSpace} />
                         )}
 
@@ -120,7 +130,7 @@ class Item extends React.Component {
             <Grid item xs container alignItems='center'
                 onClick={ev => {
                     ev.preventDefault();
-                    props.onClickSpace(space, agent.Articles.bySpace(space._id, 0));
+                    props.onClickSpace(space, Promise.all([agent.Articles.bySpace(space._id, 0), agent.Spaces.get(space._id)]));
                 }}
             >
                 <span>&nbsp;{space.name}</span>
@@ -139,8 +149,6 @@ const styles = theme => ({
         top: 60
     },
     header: {
-        display: 'flex',
-        alignItems: 'center',
         height: 52,
         marginBottom: 0
     },

@@ -33,7 +33,14 @@ module.exports = {
     },
 
     actions: {
-
+        /**
+         * create new User with username & password
+         * 
+         * @actions
+         * @param {Object} user - User credentials
+         * 
+         * @returns {Object} Logged in user with token
+        */
         create: {
             rest: "POST /",
             params: {
@@ -300,7 +307,21 @@ module.exports = {
                     })
                     .then(user => this.transformProfile(ctx, user, ctx.meta.user));
             }
-        }
+        },
+
+        /**
+         * Get user by ID
+         * 
+		 * @param {String} user - user ID
+        */
+        getById: {
+            params: {
+                _id: "string"
+            },
+            handler(ctx) {
+                return this.getById(ctx.params._id);
+            }
+        },
     },
 
     methods: {

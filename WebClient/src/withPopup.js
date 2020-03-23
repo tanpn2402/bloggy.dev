@@ -50,7 +50,8 @@ export default function withPopup(WrappedComponent) {
                 <Dialog
                     open={isOpen}
                     TransitionComponent={Transition}
-                    keepMounted
+                    mountOnEnter
+                    unmountOnExit
                     onClose={this.handleClose}
                 >
                     <DialogTitle>{typeof state.title === 'function' ? state.title() : state.title}</DialogTitle>

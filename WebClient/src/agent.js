@@ -95,10 +95,14 @@ const Spaces = {
         requests.get(`/spaces/${_id}`),
     byAuthor: (author, page) =>
         requests.get(`/spaces?author=${encode(author)}&${limit(5, page)}`),
-    byFollowed: (username, page) =>
-        requests.get(`/spaces?username=${username}&favourite=1&${limit(5, page)}`),
+    byFollowed: (user_id, page) =>
+        requests.get(`/spaces/${user_id}/followed?${limit(5, page)}`),
     byRecommended: (page) =>
         requests.get(`/spaces/recommended?${limit(5, page)}`),
+    follow: _id =>
+        requests.post(`/spaces/${_id}/follow`),
+    unfollow: _id =>
+        requests.del(`/spaces/${_id}/follow`),
     update: space =>
         requests.put(`/spaces/${space.slug}`, { space: omitSlug(space) }),
     create: space =>

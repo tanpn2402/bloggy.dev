@@ -99,7 +99,8 @@ class Home extends React.Component {
             props.onClickSpace(payload, ({ payload }) => {
                 this.setState({
                     loading: false,
-                    articles: payload.articles || []
+                    articles: payload[0].articles || [],
+                    spaceInfo: payload[1].spaces
                 })
             });
         }

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ArticleList from '../ArticleList';
 import agent from '../../agent';
 import { connect } from 'react-redux';
 import { Paper, Typography, withStyles, Grid, Button, Divider } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import withPopup from '../../withPopup';
+import CheckIcon from '@material-ui/icons/Check';
 
 const TYPE = require('../../constants/spaceTypes').default;
 
@@ -36,9 +37,9 @@ const MainView = props => {
                 classes={props.classes}
                 token={props.token}
                 space={props.space}
+                history={props.history}
                 spaceInfo={props.spaceInfo}
                 showPopup={props.showPopup}
-                history={props.history}
             />
 
             <ArticleList
@@ -122,12 +123,17 @@ const SpaceInfo = props => {
         return null;
     }
 
+    const [isFollowed, setIsFollowed] = useState(spaceInfo.followed);
     const template = TYPE.filter(e => e.type === spaceInfo.type)[0] || {};
     const Icon = template.icon;
 
     const onFollow = () => {
         if (props.token) {
-
+            agent.Spaces.follow(spaceInfo._id).then(res => {
+                if (res.code === 200) {
+                    setIsFollowed(true);
+                }
+            })
         } else {
             props.showPopup({
                 title: () => <Typography variant='h6' color='primary'>Theo dõi Space</Typography>,
@@ -159,16 +165,22 @@ const SpaceInfo = props => {
                     </Grid>
                 </Grid>
                 <Grid item>
-                    <Typography color='primary' display='inline'><b>5,393</b></Typography> người theo dõi
+                    <Typography color='primary' display='inline'><b>{spaceInfo.followsCount}</b></Typography> người theo dõi
                 </Grid>
                 <Grid item xs />
                 <Grid item>
-                    <Button color='primary'
+                    {!isFollowed && <Button color='primary'
                         startIcon={<AddIcon color='primary' />}
                         onClick={onFollow}
                     >
                         Theo dõi
-                    </Button>
+                    </Button>}
+                    {isFollowed && <Grid container alignItems='center'>
+                        <Grid item>
+                            <Grid container alignItems='center'><CheckIcon color='primary' /></Grid>
+                        </Grid>
+                        <Typography variant='button' color='primary'>&nbsp;&nbsp;&nbsp;Đã theo dõi</Typography>
+                    </Grid>}
                 </Grid>
             </Grid>
             <Divider />
@@ -181,8 +193,6 @@ const SpaceInfo = props => {
 
 
 const styles = theme => {
-    console.log(theme);
-
     return ({
         spaceInfo: {
             marginBottom: 10,
@@ -200,8 +210,10 @@ const styles = theme => {
 }
 
 const mapStateToProps = state => ({
-    token: state.common.token,
-    currentUser: state.common.currentUser
+    token: state.common.token
 });
 
-export default connect(mapStateToProps)(withStyles(styles)(withPopup(MainView)));
+const mapDispatchToProps = dispatch => ({
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(withPopup(MainView)));

@@ -12,6 +12,33 @@ module.exports = {
 	 * Default settings
 	 */
     settings: {
+        // Populates
+        populates: {
+            author(ids, spaces, rule, ctx) {
+                return this.Promise.all(
+                    spaces.map(space => ctx.call("users.get", { id: space.author }).then(res => space.author = {
+                        _id: space.author,
+                        username: res.username,
+                        email: res.email,
+                        image: res.image || '/assets/images/default/smiley-cyrus.jpg'
+                    }))
+                );
+            },
+            followCount(ids, spaces, rule, ctx) {
+                return this.Promise.all(spaces.map(space => ctx.call("follow_spaces.count", { space: space._id.toString() }).then(count => space.followsCount = count)));
+            },
+            followed(ids, spaces, rule, ctx) {
+                if (ctx.meta.user)
+                    return this.Promise.all(
+                        spaces.map(space => ctx.call("follow_spaces.has", { space: space._id.toString(), user: ctx.meta.user._id.toString() }).then(res => space.followed = res))
+                    );
+                else {
+                    spaces.forEach(space => space.followed = false);
+                    return this.Promise.resolve();
+                }
+            },
+        },
+
         // Validation schema for new entities
         entityValidator: {
             name: { type: "string", min: 1 },
@@ -62,8 +89,8 @@ module.exports = {
 		 * List articles with pagination.
 		 * 
 		 * @actions
-		 * @param {String} type - Filter for 'type'
-		 * @param {String} author - Filter for author ID
+		 * @param {String} type - Filter for 'type' [type=other,music]
+		 * @param {String} author - Filter for author username
 		 * @param {Number} limit - Pagination limit
 		 * @param {Number} offset - Pagination offset
 		 * 
@@ -89,6 +116,7 @@ module.exports = {
                     limit,
                     offset,
                     sort: ["-createdAt"],
+                    populate: ["author", "followCount", "followed"],
                     query: {}
                 };
                 let countParams;
@@ -124,8 +152,8 @@ module.exports = {
 
                         // Get count of all rows
                         this.adapter.count(countParams)
-
-                    ])).then(res => {
+                    ]))
+                    .then(res => {
                         return this.transformDocuments(ctx, params, res[0])
                             .then(docs => this.transformResult(ctx, docs, ctx.meta.user))
                             .then(r => {
@@ -160,7 +188,7 @@ module.exports = {
 
                         return entity;
                     })
-                    .then(doc => this.transformDocuments(ctx, { populate: ["author", "favorited", "favoritesCount"] }, doc))
+                    .then(doc => this.transformDocuments(ctx, { populate: ["author", "followCount", "followed"] }, doc))
                     .then(entity => this.transformResult(ctx, entity, ctx.meta.user));
             }
         },
@@ -221,6 +249,34 @@ module.exports = {
 
 
 		/**
+		 * get followed spaces
+		 * 
+		 * @actions
+		 * 
+		 * @param {String} user - user ID
+		 */
+        followed: {
+            cache: {
+                // keys: ["id"]
+            },
+            params: {
+                user: { type: "string", optional: true },
+                limit: { type: "number", optional: true, convert: true },
+                offset: { type: "number", optional: true, convert: true },
+            },
+            handler(ctx) {
+                return ctx.call("users.getById", { _id: ctx.params.user })
+                    .then(user => {
+                        if (!user) {
+                            return this.Promise.reject(new MoleculerClientError("User not found"));
+                        }
+
+                        return ctx.call("follow_spaces.followed", { ...ctx.params });
+                    });
+            }
+        },
+
+		/**
 		 * Follow space
 		 * 
 		 * @actions
@@ -228,48 +284,51 @@ module.exports = {
 		 * @param {String} space - space_id
 		 */
         follow: {
+            auth: "required",
             params: {
-                space: { type: "string" },
+                space: { type: "any" },
             },
             handler(ctx) {
-                return this.getById(ctx.params.space)
+                return this.Promise.resolve(ctx.params.space)
+                    .then(space_id => this.getById(space_id))
                     .then(space => {
-                        if (!space)
+                        if (!space) {
                             return this.Promise.reject(new MoleculerClientError("Space not found!", 404));
+                        }
 
-                        return ctx.call("follow_spaces.add", { user: ctx.meta.user._id.toString(), space: space })
-                            .then(() => this.transformDocuments(ctx, {}, user));
+                        return ctx.call("follow_spaces.add", { user: ctx.meta.user._id.toString(), space: space._id.toString() }).then(() => space)
                     })
-                    .then(user => this.transformProfile(ctx, user, ctx.meta.user));
+                    .then(space => this.transformDocuments(ctx, {}, space))
+                    .then(entity => this.transformResult(ctx, entity, ctx.meta.user));
             }
         },
 
 		/**
-		 * Delete a following record
+		 * Unfollow space
 		 * 
 		 * @actions
 		 * 
-		 * @param {String} user - Follower username
-		 * @param {String} follow - Followee username
-		 * @returns {Number} Count of removed records
+		 * @param {String} space - space_id
 		 */
-        delete: {
+        unfollow: {
+            auth: "required",
             params: {
-                user: { type: "string" },
-                follow: { type: "string" },
+                space: { type: "any" },
             },
             handler(ctx) {
-                const { follow, user } = ctx.params;
-                return this.findByFollowAndUser(follow, user)
-                    .then(item => {
-                        if (!item)
-                            return this.Promise.reject(new MoleculerClientError("User has not followed yet"));
+                return this.Promise.resolve(ctx.params.space)
+                    .then(space_id => this.getById(space_id))
+                    .then(space => {
+                        if (!space) {
+                            return this.Promise.reject(new MoleculerClientError("Space not found!", 404));
+                        }
 
-                        return this.adapter.removeById(item._id)
-                            .then(json => this.entityChanged("removed", json, ctx).then(() => json));
-                    });
+                        return ctx.call("follow_spaces.delete", { user: ctx.meta.user._id.toString(), space: space._id.toString() }).then(() => space)
+                    })
+                    .then(space => this.transformDocuments(ctx, {}, space))
+                    .then(entity => this.transformResult(ctx, entity, ctx.meta.user));
             }
-        }
+        },
     },
 
 	/**

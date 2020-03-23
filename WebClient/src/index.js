@@ -49,6 +49,11 @@ const muiTheme = createMuiTheme({
             deleteIconColorPrimary: {
                 color: 'white'
             }
+        },
+        MuiTypography: {
+            button: {
+                textTransform: 'inherit'
+            }
         }
     }
 });
