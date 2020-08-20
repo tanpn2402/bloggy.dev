@@ -6,7 +6,7 @@
         "dev:cluster": "moleculer-runner --repl --instances 4 services"
     },
     "dependencies": {
-        "bcrypt": "^4.0.0",
+        "bcrypt": "^5.0.0",
         "jsonwebtoken": "^8.1.0",
         "lodash": "^4.17.4",
         "moleculer": "^0.14.0",
